@@ -1,0 +1,13 @@
+# Configuração da API AnatomInd
+# Este arquivo pode ser usado para configurações futuras
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[models]
+default_chat_model = "tg263-8b"
+
+[classification]
+abstain_sim_threshold = 0.85
+max_labels = 5

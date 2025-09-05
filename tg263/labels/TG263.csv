@@ -1,0 +1,719 @@
+Target Type;Major Category;Minor Category;Anatomic Group;TG263-Primary Name;Description
+Anatomic;Artery;Aorta;Thorax;A_Aorta;Aorta
+Anatomic;Artery;Aorta;Thorax;A_Aorta_Asc;Ascending Aorta
+Anatomic;Artery;Brachiocephalic;Thorax;A_Brachiocephls;Brachiocephalic Artery
+Anatomic;Artery;Carotid;Head and Neck;A_Carotid;Common Carotid Artery
+Anatomic;Artery;Carotid;Head and Neck;A_Carotid_L;Carotid Artery
+Anatomic;Artery;Carotid;Head and Neck;A_Carotid_R;Carotid Artery
+Anatomic;Artery;Celiac;Abdomen;A_Celiac;Celiac Artery
+Anatomic;Artery;Coronary;Head and Neck;A_Coronary;Coronary Artery
+Anatomic;Artery;Coronary;Thorax;A_Coronary_L;Coronary Artery Left
+Anatomic;Artery;Coronary;Thorax;A_Coronary_R;Coronary Artery Right
+Anatomic;Artery;Femoral;Limb;A_Femoral_Cflx_L;Circumflex Left Femoral Artery
+Anatomic;Artery;Femoral;Limb;A_Femoral_Cflx_R;Circumflex Right Femoral Artery
+Anatomic;Artery;Femoral;Limb;A_Femoral_L;Femoral Artery Left
+Anatomic;Artery;Femoral;Limb;A_Femoral_R;Femoral Artery Right
+Anatomic;Artery;Humeral;Limb;A_Humeral_Cflx_L;Circumflex Humeral Artery Left
+Anatomic;Artery;Humeral;Limb;A_Humeral_Cflx_R;Circumflex Humeral Artery Right
+Anatomic;Artery;Humeral;Limb;A_Humeral_L;Humeral Artery Left
+Anatomic;Artery;Humeral;Limb;A_Humeral_R;Humeral Artery Right
+Anatomic;Artery;Hypophyseal;Head and Neck;A_Hypophyseal_I;Hypophyseal Artery Inferior
+Anatomic;Artery;Hypophyseal;Head and Neck;A_Hypophyseal_S;Hypophyseal Artery Superior
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_Cflx_L;Circumflex Left Iliac Artery
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_Cflx_R;Circumflex Right Iliac Artery
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_Ext_L;External iliac artery Left
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_Ext_R;External iliac artery Right
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_Int_L;Internal iliac artery Left
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_Int_R;Internal iliac artery Right
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_L;Common iliac artery Left
+Anatomic;Artery;Iliac;Pelvis;A_Iliac_R;Common iliac artery Right
+Anatomic;Artery;LAD;Thorax;A_LAD;Anterior interventricular branch of LCA
+(left anterior descending artery);;;;;
+Anatomic;Artery;Mesenteric;Abdomen;A_Mesenteric_I;Inferior mesenteric artery
+Anatomic;Artery;Mesenteric;Abdomen;A_Mesenteric_S;Superior mesenteric artery
+Anatomic;Artery;Pulmonary;Thorax;A_Pulmonary;Pulmonary Artery
+Anatomic;Artery;Subclavian;Thorax;A_Subclavian;Subclavian Artery
+Anatomic;Artery;Subclavian;Thorax;A_Subclavian_L;Subclavian Artery Left
+Anatomic;Artery;Subclavian;Thorax;A_Subclavian_R;Subclavian Artery Right
+Anatomic;Artery;Vertebral;Thorax;A_Vertebral;Vertebral arteries
+Anatomic;Artery;Vertebral;Thorax;A_Vertebral_L;Vertebral arteries left
+Anatomic;Artery;Vertebral;Thorax;A_Vertebral_R;Vertebral arteries right
+Anatomic;Bone;Pelvic;Pelvis;Acetabulum_L;Acetabulum
+Anatomic;Bone;Pelvic;Pelvis;Acetabulum_R;Acetabulum
+Anatomic;Bone;Pelvic;Pelvis;Acetabulums;Acetabulum
+Anatomic;Lung;;Thorax;AirWay_Dist;Distal Airway
+Anatomic;Lung;;Thorax;AirWay_Prox;Proximal Airway
+Anatomic;Bowel;Anus;Pelvis;Anus;Anus
+Anatomic;Bowel;Appendix;Abdomen;Appendix;Appendix
+Anatomic;Cartilage;Arytenoid;Head and Neck;Arytenoid;Arytenoid cartilage
+Anatomic;Cartilage;Arytenoid;Head and Neck;Arytenoid_L;Arytenoid cartilage Left
+Anatomic;Cartilage;Arytenoid;Head and Neck;Arytenoid_R;Arytenoid cartilage Right
+Anatomic;Heart;Atrium;Thorax;Atrium;Atrium of the heart
+Anatomic;Heart;Atrium;Thorax;Atrium_L;Atrium of the heart Left
+Anatomic;Heart;Atrium;Thorax;Atrium_R;Atrium of the heart Right
+Non_Anatomic;Bowel;;Abdomen;Bag_Bowel;Bowel Bag
+Non_Anatomic;Devices;;Body;Bag_Ostomy;Ostomy Bag
+Anatomic;Bowel;Bile;Abdomen;BileDuct_Common;Common bile duct
+Anatomic;Bladder;;Pelvis;Bladder;Urinary Bladder
+Anatomic;Bladder;;Pelvis;Bladder_Wall;Bladder Wall
+Derived;Bladder;;Pelvis;Bladder-CTV;Bladder minus CTV
+Anatomic;Body;;Body;Body;Only the body
+Derived;Body;;Body;Body-PTV;Body minus PTV
+Non_Anatomic;Bolus;;Body;Bolus;Bolus
+Non_Anatomic;Bolus;;Body;Bolus_xxmm;Bolus that is xx millimeters thick e.g. Bolus_03mm, Bolus_10mm
+Anatomic;Bone;;Body;Bone;Bone
+Anatomic;Bone;Ethmoid;Head and Neck;Bone_Ethmoid;Ethmoid Bone
+Anatomic;Bone;Frontal;Head and Neck;Bone_Frontal;Frontal Bone
+Anatomic;Bone;Hyoid;Head and Neck;Bone_Hyoid;Hyoid Bone
+Anatomic;Bone;Ilium;Pelvis;Bone_Ilium;Ilium
+Anatomic;Bone;Ilium;Pelvis;Bone_Ilium_L;Ilium Left
+Anatomic;Bone;Ilium;Pelvis;Bone_Ilium_R;Ilium Right
+Anatomic;Ear;Incus;Head and Neck;Bone_Incus;Incus
+Anatomic;Ear;Incus;Head and Neck;Bone_Incus_L;Incus Left
+Anatomic;Ear;Incus;Head and Neck;Bone_Incus_R;Incus Right
+Anatomic;Bone;Ischium;Pelvis;Bone_Ischium_L;Ischium Left
+Anatomic;Bone;Ischium;Pelvis;Bone_Ischium_R;Ischium Right
+Anatomic;Bone;Lacrimal;Head and Neck;Bone_Lacrimal;Lacrimal Bone
+Anatomic;Bone;Lacrimal;Head and Neck;Bone_Lacrimal_L;Lacrimal Bone Left
+Anatomic;Bone;Lacrimal;Head and Neck;Bone_Lacrimal_R;Lacrimal Bone Right
+Anatomic;Bone;Mandible;Head and Neck;Bone_Mandible;Mandible
+Anatomic;Bone;Mastoid;Head and Neck;Bone_Mastoid;Both Mastoids
+Anatomic;Bone;Mastoid;Head and Neck;Bone_Mastoid_L;Left Mastoid Bone
+Anatomic;Bone;Mastoid;Head and Neck;Bone_Mastoid_R;Right Mastoid Bone
+Anatomic;Bone;Nasal;Head and Neck;Bone_Nasal;Nasal Bone
+Anatomic;Bone;Nasal;Head and Neck;Bone_Nasal_L;Nasal Bone Left
+Anatomic;Bone;Nasal;Head and Neck;Bone_Nasal_R;Nasal Bone Right
+Anatomic;Bone;Occipital;Head and Neck;Bone_Occipital;Occipital Bone
+Anatomic;Bone;Palatine;Head and Neck;Bone_Palatine;Palatine  bone
+Anatomic;Bone;Palatine;Head and Neck;Bone_Palatine_L;Palatine bone Left
+Anatomic;Bone;Palatine;Head and Neck;Bone_Palatine_R;Palatine bone Right
+Anatomic;Bone;Parietal;Head and Neck;Bone_Parietal;Parietal bone
+Anatomic;Bone;Parietal;Head and Neck;Bone_Parietal_L;Parietal bone Left
+Anatomic;Bone;Parietal;Head and Neck;Bone_Parietal_R;Parietal bone Right
+Anatomic;Bone;Pelvic;Pelvis;Bone_Pelvic;Pelvic Bones (Bony Pelvis)
+Anatomic;Bone;Pelvic;Pelvis;Bone_Pelvic_L;Bony Pelvis Left
+Anatomic;Bone;Pelvic;Pelvis;Bone_Pelvic_R;Bony Pelvis Right
+Anatomic;Bone;Sphenoid;Head and Neck;Bone_Sphenoid;Sphenoid Bone
+Anatomic;Bone;Temporal;Head and Neck;Bone_Temporal;Temporal Bone
+Anatomic;Bone;Temporal;Head and Neck;Bone_Temporal_L;Temporal Bone Left
+Anatomic;Brain;Temporal;Head and Neck;Bone_Temporal_R;Temporal Bone Right
+Anatomic;Bone;Zygomatic;Head and Neck;Bone_Zygomatic_L;Zygomatic Bone Left
+Anatomic;Bone;Zygomatic;Head and Neck;Bone_Zygomatic_R;Zygomatic Bone Right
+Anatomic;Bone;Zygomatic;Head and Neck;Bone_Zygomatics;Zygomatic Bone
+Anatomic;Bone;Marrow;Body;BoneMarrow;Bone Marrow
+Anatomic;Bone;Marrow;Body;BoneMarrow_Act;Active Bone Marrow
+Non-Anatomic;Body;;Body;Boost;Boost Volume
+Anatomic;Bowel;;Abdomen;Bowel;Bowel
+Anatomic;Bowel;Large;Pelvis;Bowel_Large;Large Bowel
+Anatomic;Bowel;;Abdomen;Bowel_Small;Small Bowel (small intestine)
+Anatomic;Nerve;Brachial;Thorax;BrachialPlex_L;Brachial plexus Left
+Anatomic;Nerve;Brachial;Thorax;BrachialPlex_R;Brachial plexus Right
+Anatomic;Nerve;Brachial;Thorax;BrachialPlexs;Brachial plexus
+Anatomic;Brain;Brain;Head and Neck;Brain;Brain
+Derived;Brain;Brain;Head and Neck;Brain-CTV;Brain minus the CTV
+Derived;Brain;Brain;Head and Neck;Brain-GTV;Brain minus the GTV
+Derived;Brain;Brain;Head and Neck;Brain-PTV;Brain minus the PTV
+Anatomic;Nerve;Brainstem;Head and Neck;Brainstem;Brain Stem
+Anatomic;Nerve;Brainstem;Head and Neck;Brainstem_Core;Core of the brainstem
+PRV;Nerve;PRV;Head and Neck;Brainstem_PRV;PRV for the Brainstem
+PRV;Nerve;PRV;Head and Neck;Brainstem_PRVxx;PRV margin on the brain stem that is an xx millimeter expansion
+Anatomic;Nerve;Brainstem;Head and Neck;Brainstem_Surf;Surface of the brainstem
+Anatomic;Breast;;Thorax;Breast_L;Breast Left
+Anatomic;Breast;;Thorax;Breast_R;Breast Right
+Anatomic;Breast;;Thorax;Breasts;Both breasts
+Anatomic;Lung;Bronchus;Thorax;Bronchus;Bronchial tree
+Anatomic;Lung;Bronchus;Thorax;Bronchus_L;Bronchial tree Left
+Anatomic;Lung;Bronchus;Thorax;Bronchus_Main;Main Bronchus
+Anatomic;Lung;Bronchus;Thorax;Bronchus_Main_L;Main Bronchus Left
+Anatomic;Lung;Bronchus;Thorax;Bronchus_Main_R;Main Bronchus Right
+Anatomic;Lung;Bronchus;Thorax;Bronchus_PRVxx;A PRV expansion on the Bronchus that  is xx millimeters thick
+Anatomic;Lung;Bronchus;Thorax;Bronchus_R;Bronchial tree Right
+Anatomic;Bowel;Anus;Pelvis;Canal_Anal;Anal Canal
+Anatomic;Carina;;Thorax;Carina;Carina
+Anatomic;Cartilage;Thyroid;Thorax;Cartlg_Thyroid;Thyroid cartilage
+Anatomic;Nerve;CaudaEquina;Pelvis;CaudaEquina;Cauda equina
+Anatomic;Reproductive;;Pelvis;Cavernosum;Penis Corpus Cavernosum
+Anatomic;Nose;Nasal;Head and Neck;Cavity_Nasal;Nasal Cavity
+Anatomic;Mouth;Oral Cavity;Head and Neck;Cavity_Oral;Oral cavity
+Anatomic;Bowel;;Abdomen;Cecum;Large bowel - Cecum
+Anatomic;Brain;Cerebellum;Head and Neck;Cerebellum;Cerebellum
+Anatomic;Brain;Cerebrum;Head and Neck;Cerebrum;Cerebrum
+Anatomic;Brain;Cerebrum;Head and Neck;Cerebrum_L;Cerebrum_L
+Anatomic;Brain;Cerebrum;Head and Neck;Cerebrum_R;Cerebrum_R
+Anatomic;Cervix;;Pelvis;Cervix;Cervix of uterus
+Anatomic;Chest wall;;Thorax;Chestwall;Chest wall
+Anatomic;Chest wall;;Thorax;Chestwall_L;Left Chest Wall
+Anatomic;Chest wall;;Thorax;Chestwall_R;Right Chest Wall
+Anatomic;Brain;;Head and Neck;Cist_Pontine;Pontine Cistern
+Anatomic;Brain;;Head and Neck;Cist_Suprasellar;Cist_Suprasellar
+Anatomic;Bone;Clavicle;Thorax;Clavicle_L;Clavicle Left
+Anatomic;Bone;Clavicle;Thorax;Clavicle_R;Clavicle Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_III;Third Cranial Nerve (Oculomotor nerve)
+Anatomic;Nerve;Cranial;Head and Neck;CN_III_L;Third Cranial Nerve (Oculomotor nerve) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_III_R;Third Cranial Nerve (Oculomotor nerve) Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_IX;Ninth Cranial Nerve (Glossopharyngeal nerve)
+Anatomic;Nerve;Cranial;Head and Neck;CN_IX_L;Ninth Cranial Nerve (Glossopharyngeal nerve) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_IX_R;Ninth Cranial Nerve (Glossopharyngeal nerve) Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_V;Fifth Cranial Nerve (Trigeminal nerve)
+Anatomic;Nerve;Cranial;Head and Neck;CN_V_L;Fifth Cranial Nerve (Trigeminal nerve) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_V_R;Fifth Cranial Nerve (Trigeminal nerve) Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_VI;Sixth Cranial Nerve (Abducens nerve)
+Anatomic;Nerve;Cranial;Head and Neck;CN_VI_L;Sixth Cranial Nerve (Abducens nerve) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_VI_R;Sixth Cranial Nerve (Abducens nerve) Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_VII;Seventh Cranial Nerve (Facial)
+Anatomic;Nerve;Cranial;Head and Neck;CN_VII_L;Seventh Cranial Nerve (Facial) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_VII_R;Seventh Cranial Nerve (Facial) Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_VIII;Eighth Cranial (Vestibulocochlear) Nerve
+Anatomic;Nerve;Cranial;Head and Neck;CN_VIII_L;Eighth Cranial (Vestibulocochlear)  Nerve Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_VIII_R;Eighth Cranial (Vestibulocochlear)  Nerve Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_XI;Eleventh Cranial Nerve (Spinal accessory nerve)
+Anatomic;Nerve;Cranial;Head and Neck;CN_XI_L;Eleventh Cranial Nerve (Spinal accessory nerve) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_XI_R;Eleventh Cranial Nerve (Spinal accessory nerve) Right
+Anatomic;Nerve;Cranial;Head and Neck;CN_XII;Twelfth Cranial Nerve (Hypoglossal nerve)
+Anatomic;Nerve;Cranial;Head and Neck;CN_XII_L;Twelfth Cranial Nerve (Hypoglossal nerve) Left
+Anatomic;Nerve;Cranial;Head and Neck;CN_XII_R;Twelfth Cranial Nerve (Hypoglossal nerve) Right
+Anatomic;Ear;Cochlea;Head and Neck;Cochlea;Cochlea
+Anatomic;Ear;Cochlea;Head and Neck;Cochlea_L;Left Cochlea
+Anatomic;Ear;Cochlea;Head and Neck;Cochlea_R;Right Cochlea
+Anatomic;Bowel;Colon;Abdomen;Colon;Colon
+Anatomic;Bowel;Colon;Abdomen;Colon_Ascending;Large bowel - Ascending colon
+Anatomic;Bowel;Colon;Abdomen;Colon_Decending;Large bowel - Descending colon
+Anatomic;Bowel;;Abdomen;Colon_PTVxx;PRV created with xx mm expansion on the left optic nerve
+Anatomic;Bowel;Colon;Abdomen;Colon_Sigmoid;Large bowel - Sigmoid colon
+Anatomic;Bowel;Colon;Abdomen;Colon_Transverse;Large bowel -Transverse colon
+Anatomic;Eye;Cornea;Head and Neck;Cornea;Cornea
+Anatomic;Eye;Cornea;Head and Neck;Cornea_L;Cornea Left
+Anatomic;Eye;Cornea;Head and Neck;Cornea_R;Cornea Right
+Anatomic;Bone;Skull;Head and Neck;CribriformPlate;Cribriform Plate
+Anatomic;Cartilage;Cricoid;Head and Neck;Cricoid;Cricoid cartilage
+Anatomic;Pharynx;Constrictors;Head and Neck;Cricopharyngeus;Cricopharyngeal part of inferior pharyngeal constrictor
+Target;CTV;;Body;CTV;Clinical Tumor Volume
+Anatomic;Bone;Spine;Head and Neck;Dens;Cervical vertebrae - Bony part of dens of axis
+Anatomic;Diaphragm;;Thorax;Diaphragm;Diaphragm
+Anatomic;Gut;;Abdomen;Duodenum;Small bowel - Duodenum
+Anatomic;Ear;External;Head and Neck;Ear_External_L;External Ear Left
+Anatomic;Ear;External;Head and Neck;Ear_External_R;External Ear Right
+Anatomic;Ear;External;Head and Neck;Ear_Externals;External Ear
+Anatomic;Ear;Internal;Head and Neck;Ear_Internal_L;Internal Ear Left
+Anatomic;Ear;Internal;Head and Neck;Ear_Internal_R;Internal Ear Right
+Anatomic;Ear;Internal;Head and Neck;Ear_Internals;Internal Ear
+Anatomic;Ear;Middle;Head and Neck;Ear_Middle;Middle Ear
+Anatomic;Ear;Middle;Head and Neck;Ear_Middle_L;Middle Ear Left
+Anatomic;Ear;Middle;Head and Neck;Ear_Middle_R;Middle Ear Right
+Anatomic;Skin;;Body;Edema;Edema
+Anatomic;Joint;;Limbs;Elbow;Elbow
+Anatomic;Joint;;Limbs;Elbow_L;Elbow Left
+Anatomic;Joint;;Limbs;Elbow_R;Elbow Right
+Non-Anatomic;Body;;Body;E-PTV_Ev05_xxxx;All tissue excluding the 5 mm expanded PTV. Generated by subtracting the 5 mm expanded PTV receiving a dose of xxxx cGy from the external contour.
+Non-Anatomic;Derived;;Body;E-PTV_xxxx;All tissue excluding the PTV. Generated by subtracting the PTV receiving a dose of xxxx cGy from the external contour.
+Anatomic;Esophagus;;Thorax;Esophagus;Esophagus
+Anatomic;Esophagus;;Thorax;Esophagus_I;Lower Esophagus (abdominal)
+Anatomic;Esophagus;;Thorax;Esophagus_M;Middle Esophagus (thoracic)
+Anatomic;Esophagus;;Thorax;Esophagus_NAdj;Non Adjacent Esophagus
+Anatomic;Esophagus;;Thorax;Esophagus_S;Upper Esophagus (cervical)
+Non-Anatomic;Body;;Body;Eval;Evaluation Structure
+Anatomic;Body;;Body;External;Contour encompassing body plus other external items
+Anatomic;Eye;Eyeball;Head and Neck;Eye_L;Eyeball Left
+Anatomic;Eye;Eyeball;Head and Neck;Eye_R;Eyeball Right
+Anatomic;Eye;;Head and Neck;Eyes;Set of eyes
+Anatomic;Bone;Femur;Pelvis;Femur_Base_L;Femur Base Left
+Anatomic;Bone;Femur;Pelvis;Femur_Base_R;Femur Base Right
+Anatomic;Bone;Femur;Pelvis;Femur_Head_L;Femur Head & Neck Left
+Anatomic;Bone;Femur;Pelvis;Femur_Head_R;Femur Head & Neck Right
+Anatomic;Joint;Femur;Pelvis;Femur_Joint_L;Femoral Joint Left
+Anatomic;Joint;Femur;Pelvis;Femur_Joint_R;Femoral Joint Right
+Anatomic;Bone;Femur;Limb;Femur_L;Femur  Whole Left
+Anatomic;Bone;Femur;Pelvis;Femur_Neck_L;Femur Neck Right
+Anatomic;Bone;Femur;Pelvis;Femur_Neck_R;Femur Neck Left
+Anatomic;Bone;Femur;Limb;Femur_R;Femur Whole Right
+Anatomic;Bone;Femur;Pelvis;Femur_Shaft_L;Femur Shaft Left
+Anatomic;Bone;Femur;Pelvis;Femur_Shaft_R;Femur Shaft Right
+Anatomic;Bone;Femur;Limb;Femurs;Both Femurs
+Anatomic;Bone;Fibula;Limbs;Fibula;Fibula
+Anatomic;Bone;Fibula;Limbs;Fibula_L;Fibula Left
+Anatomic;Bone;Fibula;Limbs;Fibula_R;Fibula Right
+Non-Anatomic;Bladder;;Pelvis;Foley;Foley Catheter
+Anatomic;Bone;Fossa;Head and Neck;Fossa_Jugular;Jugular Fossa
+Anatomic;Bone;Fossa;Head and Neck;Fossa_Posterior;Posterior Fossa
+Anatomic;Gallbladder;;Pelvis;Gallbladder;Gall bladder
+Anatomic;Reproductive;;Pelvis;Genitals;Genitals
+Anatomic;Gland;Adrenal;Thorax;Glnd_Adrenal_L;Adrenal glands left
+Anatomic;Gland;Adrenal;Thorax;Glnd_Adrenal_R;Adrenal glands right
+Anatomic;Gland;Lacrimal;Head and Neck;Glnd_Lacrimal;Lacrimal Gland
+Anatomic;Gland;Lacrimal;Head and Neck;Glnd_Lacrimal_L;Lacrimal Gland Left
+Anatomic;Gland;Lacrimal;Head and Neck;Glnd_Lacrimal_R;Lacrimal Gland Right
+Anatomic;Gland;;Thorax;Glnd_Parathyroid;Parathyroid gland
+Anatomic;Gland;Sublingual;Head and Neck;Glnd_Subling_L;Sublingual gland
+Anatomic;Gland;Sublingual;Head and Neck;Glnd_Subling_R;Sublingual gland
+Anatomic;Gland;Sublingual;Head and Neck;Glnd_Sublings;Sublingual gland
+Anatomic;Gland;Submandibular;Head and Neck;Glnd_Submand_L;Submandibular Gland Left
+Anatomic;Gland;Submandibular;Head and Neck;Glnd_Submand_R;Submandibular Gland Right
+Anatomic;Gland;Submandibular;Head and Neck;Glnd_Submands;Submandibular Gland
+Anatomic;Gland;Thymus;Thorax;Glnd_Thymus;Thymus Gland
+Anatomic;Gland;Thyroid;Thorax;Glnd_Thyroid;Thyroid Gland
+Anatomic;Glottis;;Head and Neck;Glottis;Glottis
+Anatomic;Heart;;Thorax;GreatVes;Great Vessels of the heart (aorta, vena cava S&I, pulmonary A&V)
+Anatomic;Heart;;Thorax;GreatVes_NAdj;Non Adjacent Great Vessels
+Anatomic;Bone;;Body;GrowthPlate_L;GrowthPlate_L
+Anatomic;Bone;;Body;GrowthPlate_R;GrowthPlate_R
+Target;GTV;;Body;GTV;Gross Tumor Volume
+Anatomic;Head;Mouth;Head and Neck;Hardpalate;Hard palate
+Anatomic;Heart;;Thorax;Heart;Heart
+Anatomic;Brain;Hemisphere;Head and Neck;Hemisphere_L;Hemisphere_L
+Anatomic;Brain;Hemisphere;Head and Neck;Hemisphere_R;Hemisphere_R
+Anatomic;Brain;Hemisphere;Head and Neck;Hemispheres;Hemispheres
+Anatomic;Brain;Hippocampus;Head and Neck;Hippocampi;Hippocampus
+Anatomic;Brain;Hippocampus;Head and Neck;Hippocampus_L;Hippocampus Left
+Anatomic;Brain;Hippocampus;Head and Neck;Hippocampus_R;Hippocampus Right
+Anatomic;Bone;Humerus;Limbs;Humerus_L;Humerus Left
+Anatomic;Bone;Humerus;Limbs;Humerus_R;Humerus Right
+Anatomic;Brain;Hypothalamus;Head and Neck;Hypothalmus;Hypothalamus
+PRV;Brain;Hypothalamus;Head and Neck;Hypothalmus_PRV;Hypothalmus_PRV
+PRV;Brain;Hypothalamus;Head and Neck;Hypothalmus_PRVx;Hypothalmus_PRVx
+Non-Anatomic;Dose;;Body;IDL;Isodose Line e.g. IDL_5000 isodose line for 50 Gy
+Anatomic;Gut;;Abdomen;Ileum;Small bowel - Ileum
+Target;ITV;;Body;ITV;Internal Target Volume
+Anatomic;Gut;Small Bowel;Abdomen;Jejunum;Small bowel - Jejunum
+Anatomic;Gut;;Abdomen;Jejunum_Ileum;Both ileum and jejunum
+Anatomic;Joint;;Limbs;Joint_Elbow;Elbow joint
+Anatomic;Joint;;Limbs;Joint_Elbow_L;Left Elbow joint
+Anatomic;Joint;;Limbs;Joint_Elbow_R;Right Elbow joint
+Anatomic;Joint;Small Bowel;Limbs;Joint_Glenohum;Glenohumeral Joint
+Anatomic;Joint;Small Bowel;Limbs;Joint_Glenohum_L;Glenohumeral Joint Left
+Anatomic;Joint;Glenohumeral;Limbs;Joint_Glenohum_R;Glenohumeral Joint Right
+Anatomic;Joint;Glenohumeral;Body;Joint_Surface;Joint_Surface
+Anatomic;Joint;Glenohumeral;Head and Neck;Joint_TM;Temperomandibular Joint
+Anatomic;Joint;Temperomandibular;Head and Neck;Joint_TM_L;Temperomandibular Joint Left
+Anatomic;Joint;Temperomandibular;Head and Neck;Joint_TM_R;Temperomandibular Joint Right
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Cortex;Renal cortex for both Kidneys
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Cortex_L;Renal cortex left
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Cortex_R;Renal cortex right
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Hilum_L;Renal Hilum Left
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Hilum_R;Renal Hilum Right
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Hilums;Renal Hilum for both Kidneys
+Anatomic;Urinary;Kidney;Abdomen;Kidney_L;Kidney Left
+Derived;Urinary;Kidney;Abdomen;Kidney_L-GTV;Kidney_L-GTV
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Pelvis_L;Renal pelvis Left
+Anatomic;Urinary;Kidney;Abdomen;Kidney_Pelvis_R;Renal pelvis Right
+Anatomic;Urinary;Kidney;Abdomen;Kidney_R;Kidney Right
+Derived;Urinary;Kidney;Abdomen;Kidney_R-GTV;Kidney_R-GTV
+Derived;Urinary;Kidney;Abdomen;Kidney-GTV;Kidney-GTV
+Anatomic;Urinary;Kidney;Abdomen;Kidneys;Both Kidneys
+Anatomic;Joint;;Limbs;Knee;Knee
+Anatomic;Joint;;Limbs;Knee_L;Knee Left
+Anatomic;Joint;;Limbs;Knee_R;Knee Right
+Anatomic;Tissue;Laryngeal pharynx;Head and Neck;Laryngl_Pharynx;Laryngeal pharynx
+Anatomic;Larynx;;Head and Neck;Larynx;Larynx
+Anatomic;Larynx;;Head and Neck;Larynx_SG;Supraglottic Larynx
+Non_Anatomic;Devices;;Body;Leads;Leads
+Anatomic;Eye;Lens;Head and Neck;Lens;Eye Lens
+Anatomic;Eye;Lens;Head and Neck;Lens_L;Lens Left
+Anatomic;Eye;Lens;Head and Neck;Lens_R;Lens Right
+Anatomic;Ligament;Hepatogastric;Abdomen;Lig_Hepatogastrc;Hepatogastric ligament
+Anatomic;Feature;;Head and Neck;Lips;Lips
+Anatomic;Liver;;Abdomen;Liver;Liver
+Derived;Liver;;Abdomen;Liver-CTV;Liver-CTV
+Derived;Liver;;Abdomen;Liver-GTV;Liver minus GTV
+Anatomic;Lymph Node;;Body;LN;Lymph Node
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Apical;Set of apical axillary lymphatic vessels
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Apical_L;Axillary lymphatic chain - Apical Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Apical_R;Axillary lymphatic chain - Apical Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Central_L;Axillary lymphatic chain - Central Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Central_R;Axillary lymphatic chain - Central Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Centrals;Set of central axillary lymphatic vessels
+Anatomic;Lymph Node;;Thorax;LN_Ax_L;Axillary lymphatic chain Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_L1_L;Level 1 Axillary Lymph Node Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_L1_R;Level 1 Axillary Lymph Node Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_L2_L;Level 2 Axillary Lymph Node Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_L2_R;Level 2 Axillary Lymph Node Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_L3_L;Level 3 Axillary Lymph Node Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_L3_R;Level 3 Axillary Lymph Node Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Lateral_L;Axillary lymphatic chain - Lateral Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Lateral_R;Axillary lymphatic chain - Lateral Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Laterals;pair of Lungs
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Pectoral_L;Axillary lymphatic chain - Pectoral Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Pectoral_R;Axillary lymphatic chain - Pectoral Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Pectorals;Set of pectoral axillary lymphatic vessels
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_R;Axillary lymphatic chain Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Subscap_L;Axillary lymphatic chain - Subscapular Left
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Subscap_R;Axillary lymphatic chain - Subscapular Right
+Anatomic;Lymph Node;Axillary;Thorax;LN_Ax_Subscaps;Set of subscapular axillary lymphatic vessels
+Anatomic;Lymph Node;;Thorax;LN_Brachioceph_L;Lymph nodes of thorax - Brachiocephalic Left
+Anatomic;Lymph Node;;Thorax;LN_Brachioceph_R;Lymph nodes of thorax - Brachiocephalic Right
+Anatomic;Lymph Node;;Thorax;LN_Brachiocephs;Lymph nodes of thorax - Brachiocephalic
+Anatomic;Lymph Node;;Thorax;LN_Bronchpulm_L;Lymph nodes of thorax - Bronchopulmonary Left
+Anatomic;Lymph Node;;Thorax;LN_Bronchpulm_R;Lymph nodes of thorax - Bronchopulmonary Right
+Anatomic;Lymph Node;;Thorax;LN_Bronchpulms;Lymph nodes of thorax - Bronchopulmonary
+Anatomic;Lymph Node;;Thorax;LN_Diaphragmatic;Lymph nodes of thorax - Diaphragmatic
+Anatomic;Lymph Node;;Pelvis;LN_Iliac_Ext_L;Lymph nodes of pelvis - external iliac Left
+Anatomic;Lymph Node;;Pelvis;LN_Iliac_Ext_R;Lymph nodes of pelvis - external iliac Right
+Anatomic;Lymph Node;;Pelvis;LN_Iliac_Int_L;Lymph nodes of pelvis - internal iliac Left
+Anatomic;Lymph Node;;Pelvis;LN_Iliac_L;Lymph nodes of pelvis - common iliac Left
+Anatomic;Lymph Node;;Pelvis;LN_Iliac_R;Lymph nodes of pelvis - common iliac Right
+Anatomic;Lymph Node;Breast;Thorax;LN_IMN_L;LN_IMN_L
+Anatomic;Lymph Node;Breast;Thorax;LN_IMN_R;LN_IMN_R
+Anatomic;Lymph Node;Breast;Thorax;LN_IMNs;Lymph nodes IMN
+Anatomic;Lymph Node;;Pelvis;LN_Inguinofem;Lymph nodes of pelvis - inguinofemoral
+Anatomic;Lymph Node;;Pelvis;LN_Inguinofem_L;Lymph nodes of pelvis - inguinofemoral
+Anatomic;Lymph Node;;Pelvis;LN_Inguinofem_R;Lymph nodes of pelvis - inguinofemoral
+Anatomic;Lymph Node;;Thorax;LN_Intercostals;Lymph nodes of thorax - Intercostal
+Anatomic;Lymph Node;Unspecified;Body;LN_L;Lymph Node Left
+Anatomic;Lymph Node;;Thorax;LN_Ligamentarter;Lymph nodes of thorax - Ligamentum arteriosum
+Anatomic;Lymph Node;;Pelvis;LN_lliac_Int_R;Lymph nodes of pelvis - internal iliac Right
+Anatomic;Lymph Node;;Thorax;LN_Mediastinals;Lymph nodes of thorax - Mediastinal
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IA_L;Level IA (Submental) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IA_R;Level IA (Submental) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IB_L;Level IB (Submandibular) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IB_R;Level IB (Submandibular) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_II_L;Level IIA & IIB (Upper Jugular) neck nodes Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_II_R;Level IIA & IIB (Upper Jugular) neck nodes Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IIA_L;Level IIA (Upper Jugular) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IIA_R;Level IIA (Upper Jugular) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IIB_L;Level IIB (Upper Jugular) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IIB_R;Level IIB (Upper Jugular) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_III_L;Level III (Middle Jugular) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_III_R;Level III (Middle Jugular) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IV_L;Level IV neck (Lower Jugular) node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_IV_R;Level IV (Lower Jugular) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_V_L;Level VA, VB and VC (Posterior Triangle) neck nodes Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_V_R;Level VA, VB and VC (Posterior Triangle) neck nodes Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VA_L;Level VA (Posterior Triangle) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VA_R;Level VA (Posterior Triangle) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VB_L;Level VB (Posterior Triangle) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VB_R;Level VB (Posterior Triangle) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VC_L;Level VC (Posterior Triangle) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VC_R;Level VC (Posterior Triangle) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VI_L;Level VI (Anterior Triangle) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VI_R;Level VI (Anterior Triangle) neck node Right
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VII_L;Level VII (Upper Mediastinal) neck node Left
+Anatomic;Lymph Node;Neck Nodes;Head and Neck;LN_Neck_VII_R;Level VII (Upper Mediastinal) neck node Right
+Anatomic;Lymph Node;;Pelvis;LN_Obturator_L;Lymph nodes of pelvis - obturator Left
+Anatomic;Lymph Node;;Pelvis;LN_Obturator_R;Lymph nodes of pelvis - obturator Right
+Anatomic;Lymph Node;;Pelvis;LN_Paraaortic;Lymph nodes of abdomen- para-aortic
+Anatomic;Lymph Node;;Thorax;LN_Paramammary_L;Lymph nodes of thorax - Paramammary Left
+Anatomic;Lymph Node;;Thorax;LN_Paramammary_R;Lymph nodes of thorax - Paramammary Right
+Anatomic;Lymph Node;;Thorax;LN_Paramammarys;Lymph nodes of thorax - Paramammary
+Anatomic;Lymph Node;;Thorax;LN_Parasternal_L;Lymph nodes of thorax - Parasternal Left
+Anatomic;Lymph Node;;Thorax;LN_Parasternal_R;Lymph nodes of thorax - Parasternal Right
+Anatomic;Lymph Node;;Thorax;LN_Parasternals;Lymph nodes of thorax - Parasternal
+Anatomic;Lymph Node;;Pelvis;LN_Pelvic_L;Pelvic Lymph Nodes Left
+Anatomic;Lymph Node;;Pelvis;LN_Pelvic_R;Pelvic Lymph Nodes Right
+Anatomic;Lymph Node;;Pelvis;LN_Pelvics;Pelvic Lymph Nodes
+Anatomic;Lymph Node;Porta hepatis;Abdomen;LN_Portahepatis;Porta hepatis
+Anatomic;Lymph Node;;Pelvis;LN_Presacral_L;Lymph nodes of pelvis - presacral Left
+Anatomic;Lymph Node;;Pelvis;LN_Presacral_R;Lymph nodes of pelvis - presacral Right
+Anatomic;Lymph Node;;Thorax;LN_Pulmonary_L;Lymph nodes of thorax - Pulmonary Left
+Anatomic;Lymph Node;;Thorax;LN_Pulmonary_R;Lymph nodes of thorax - Pulmonary Right
+Anatomic;Lymph Node;;Thorax;LN_Pulmonarys;Lymph nodes of thorax - Pulmonary
+Anatomic;Lymph Node;Unspecified;Body;LN_R;Lymph Node Right
+Anatomic;Lymph Node;Breast;Body;LN_Sclav_L;Supraclavicular Lymph Node Left
+Anatomic;Lymph Node;Breast;Body;LN_Sclav_R;Supraclavicular Lymph Node Right
+Anatomic;Lymph Node;;Thorax;LN_Supmammary_L;Lymph nodes of thorax - Supramammary Left
+Anatomic;Lymph Node;;Thorax;LN_Supmammary_R;Lymph nodes of thorax - Supramammary Right
+Anatomic;Lymph Node;;Thorax;LN_Supmammarys;Lymph nodes of thorax - Supramammary
+Anatomic;Lymph Node;;Thorax;LN_Trachbrnchs;Lymph nodes of thorax - Tracheobronchial
+Anatomic;Lymph Node;;Thorax;LN_Trachbrnchs_L;Lymph nodes of thorax - Tracheobronchial Left
+Anatomic;Lymph Node;;Thorax;LN_Trachbrnchs_R;Lymph nodes of thorax - Tracheobronchial Right
+Anatomic;Brain;Lobe;Head and Neck;Lobe_Frontal;Frontal Lobe
+Anatomic;Brain;Lobe;Head and Neck;Lobe_Frontal_L;Frontal Lobe Left
+Anatomic;Brain;Lobe;Head and Neck;Lobe_Frontal_R;Frontal Lobe Left
+Anatomic;Brain;Occipital Lobe;Head and Neck;Lobe_Occipital;Occipital Lobe
+Anatomic;Brain;Occipital Lobe;Head and Neck;Lobe_Occipital_L;Occipital Lobe Left
+Anatomic;Brain;Occipital Lobe;Head and Neck;Lobe_Occipital_R;Occipital Lobe Right
+Anatomic;Brain;Lobe;Head and Neck;Lobe_Parietal;Parietal Lobe
+Anatomic;Brain;Lobe;Head and Neck;Lobe_Parietal_L;Parietal Lobe Left
+Anatomic;Brain;Lobe;Head and Neck;Lobe_Parietal_R;Parietal Lobe Right
+Anatomic;Brain;Temporal;Head and Neck;Lobe_Temporal;Temporal Lobe
+Anatomic;Brain;Temporal;Head and Neck;Lobe_Temporal_L;Temporal Lobe Left
+Anatomic;Brain;Temporal;Head and Neck;Lobe_Temporal_R;Temporal Lobe Right
+Anatomic;Lung;;Thorax;Lung_L;Lung Left
+Anatomic;Lung;;Thorax;Lung_LLL;Lung - lower lobe of left
+Anatomic;Lung;;Thorax;Lung_LUL;Lung - upper lobe of left
+Anatomic;Lung;;Thorax;Lung_R;Lung Right
+Anatomic;Lung;;Thorax;Lung_RLL;Lung - lower lobe of right
+Anatomic;Lung;;Thorax;Lung_RML;Lung - middle lobe of right
+Anatomic;Lung;;Thorax;Lung_RUL;Lung - upper lobe of right
+Anatomic;Lung;;Thorax;Lungs;Pair of Lungs
+Derived;Lung;;Thorax;Lungs-CTV;Total Lung minus the CTV
+Derived;Lung;;Thorax;Lungs-GTV;Total Lung minus the GTV
+Derived;Lung;;Thorax;Lungs-ITV;Lungs-ITV
+Derived;Lung;;Thorax;Lungs-PTV;Total Lung minus the PTV
+Anatomic;Bone;Ear;Head and Neck;Malleus;Malleus
+Anatomic;Bone;Ear;Head and Neck;Malleus_L;Malleus Left
+Anatomic;Bone;Ear;Head and Neck;Malleus_R;Malleus Right
+Non_Anatomic;Devices;;Body;Markers;Markers
+Anatomic;Bone;Maxilla;Head and Neck;Maxilla;Maxilla
+Anatomic;Bone;Maxilla;Head and Neck;Maxilla_L;Maxilla Left
+Anatomic;Bone;Maxilla;Head and Neck;Maxilla_R;Maxilla Right
+Anatomic;Heart;;Thorax;Mediastinum;Mediastinum
+Anatomic;Muscle;;Body;Musc;Muscle
+Anatomic;Muscle;Constrictors;Head and Neck;Musc_Constrict;Constrictor Muscle of Pharynx
+Anatomic;Muscle;Constrictors;Head and Neck;Musc_Constrict_I;Pharynx - Inferior pharyngeal constrictor
+Anatomic;Muscle;Constrictors;Head and Neck;Musc_Constrict_M;Pharynx - Middle pharyngeal constrictor
+Anatomic;Muscle;Constrictors;Head and Neck;Musc_Constrict_S;Pharynx - Superior pharyngeal constrictor
+Anatomic;Muscle;Digastric;Abdomen;Musc_Digastric_L;Digastric muscle Left
+Anatomic;Muscle;Digastric;Abdomen;Musc_Digastric_R;Digastric muscle Right
+Anatomic;Muscle;Masseter;Head and Neck;Musc_Masseter;Masseter Muscle
+Anatomic;Muscle;Masseter;Head and Neck;Musc_Masseter_L;Masseter Muscle Left
+Anatomic;Muscle;Masseter;Head and Neck;Musc_Masseter_R;Masseter Muscle Right
+Anatomic;Muscle;Platysma;Head and Neck;Musc_Platysma_L;Platysma Left
+Anatomic;Muscle;Platysma;Head and Neck;Musc_Platysma_R;Platysma Right
+Anatomic;Muscle;Pterygoid;Head and Neck;Musc_Pterygoid_L;Pterygoid muscles - Left
+Anatomic;Muscle;Pterygoid;Head and Neck;Musc_Pterygoid_R;Pterygoid muscles - Right
+Anatomic;Muscle;Sternocleidomastoid;Head and Neck;Musc_Sclmast_L;Sternocleidomastoid Left
+Anatomic;Muscle;Sternocleidomastoid;Head and Neck;Musc_Sclmast_R;Sternocleidomastoid Left
+Anatomic;Muscle;Temporal;Head and Neck;Musc_Temporal_L;Temporal muscle - Left
+Anatomic;Muscle;Temporal;Head and Neck;Musc_Temporal_R;Temporal muscle - Right
+Anatomic;Nose;Nasal;Head and Neck;Nasalconcha_LI;Inferior Nasal Concha Left
+Anatomic;Nose;Nasal;Head and Neck;Nasalconcha_RI;Inferior Nasal Concha Right
+Anatomic;Nose;Nasal;Head and Neck;Nasopharynx;Nasal part of pharynx
+Anatomic;Nose;Nasal;Head and Neck;Nose;Nose
+Anatomic;Nerve;;Body;Nrv_Peripheral;Peripheral Nerve
+Anatomic;Nerve;;Body;Nrv_Root;Nerve Root
+Anatomic;Nerve;Optic;Head and Neck;OpticChiasm;Optic chiasm
+PRV;Nerve;Optic;Head and Neck;OpticChiasm_PRV;PRV for Optic Chiasm
+PRV;Nerve;Optic;Head and Neck;OpticChiasm_PRVx;PRV expansion of  x mm on the optic chiasm
+Anatomic;Nerve;Optic;Head and Neck;OpticNrv;Optic nerve
+Anatomic;Nerve;Optic;Head and Neck;OpticNrv_L;Optic nerve
+PRV;Nerve;Optic;Head and Neck;OpticNrv_PRV;PRV for Optic Nerve
+PRV;Nerve;Optic;Head and Neck;OpticNrv_PRV_L;OpticNrv_PRV_L
+PRV;Nerve;Optic;Head and Neck;OpticNrv_PRV_R;OpticNrv_PRV_R
+PRV;Nerve;Optic;Head and Neck;OpticNrv_PRVxx_L;PRV expansion of xx millimeters on the right optic nerve
+PRV;Nerve;Optic;Head and Neck;OpticNrv_PRVxx_R;PRV created with xx mm expansion on the left optic nerve
+Anatomic;Nerve;Optic;Head and Neck;OpticNrv_R;Optic nerve
+Anatomic;Eye;Orbit;Head and Neck;Orbit_L;Orbit Left
+Anatomic;Eye;Orbit;Head and Neck;Orbit_R;Orbit Right
+Anatomic;Throat;Oropharynx;Head and Neck;Oropharynx;Oral part of pharynx
+Anatomic;Reproductive;;Pelvis;Ovaries;Ovary
+Anatomic;Reproductive;;Pelvis;Ovary_L;Ovary Left
+Anatomic;Reproductive;;Pelvis;Ovary_R;Ovary Right
+Non_Anatomic;Devices;;Thorax;Pacemaker;Pacemaker
+Anatomic;Muscle;Soft Palate;Head and Neck;Palate_Soft;Soft palate
+Surgical;Gut;;Abdomen;PancJejuno;The pancreatic jejuno junction - generated by surgical procedure
+Anatomic;Gland;Pancreas;Abdomen;Pancreas;Pancreas
+Anatomic;Gland;Pancreas;Abdomen;Pancreas_Head;Head of Pancreas
+Anatomic;Gland;Pancreas;Abdomen;Pancreas_Tail;Tail of Pancreas
+Anatomic;Reproductive;;Pelvis;Parametrium;Parametrium
+Anatomic;Gland;Parotid;Head and Neck;Parotid_L;Parotid Left
+Anatomic;Gland;Parotid;Head and Neck;Parotid_R;Parotid Right
+Anatomic;Gland;Parotid;Head and Neck;Parotids;Pair of Parotid Glands
+Anatomic;Reproductive;;Pelvis;PenileBulb;Penile Bulb
+Anatomic;Reproductive;;Pelvis;Penis;Penis
+Anatomic;Heart;Membrane;Thorax;Pericardium;Pericardium
+Anatomic;Perineum;;Pelvis;Perineum;Perineum
+Anatomic;Membrane;Peritoneum;Abdomen;Peritoneum;Peritoneal sac
+Anatomic;Throat;Pharynx;Head and Neck;Pharynx;Pharynx
+Anatomic;Gland;Pineal;Head and Neck;Pineal;Pineal gland
+Anatomic;Gland;Pituitary;Head and Neck;Pituitary;Pituitary gland
+PRV;Gland;Pituitary;Head and Neck;Pituitary_PRVxx;PRV constructed as xx millimeter expansion on Pituitary
+Anatomic;Brain;Brainstem;Head and Neck;Pons;Pons
+Non_Anatomic;Surgery;;Body;Postop;Post operative volume
+Non_Anatomic;Surgery;;Body;Preop;Region originally occupied by the gross tumor volume
+Anatomic;Bone;Mandible;Head and Neck;Proc_Condyloid_L;Condyloid process of mandible - Right
+Anatomic;Bone;Mandible;Head and Neck;Proc_Condyloid_R;Condyloid process of mandible - Left
+Anatomic;Bone;Mandible;Head and Neck;Proc_Coronoid_L;Coronoid process of mandible - Left
+Anatomic;Bone;Mandible;Head and Neck;Proc_Coronoid_R;Coronoid process of mandible - Right
+Anatomic;Gland;Prostate;Pelvis;Prostate;Prostate
+Anatomic;Surgery;Prostate;Pelvis;ProstateBed;Prostate Bed
+Anatomic;Surgery;;Body;Prosthesis;Prosthesis
+Anatomic;Muscle;Pterygoid;Head and Neck;Pterygoid_Lat_L;Pterygoid muscles lateral - Left
+Anatomic;Muscle;Pterygoid;Head and Neck;Pterygoid_Lat_R;Pterygoid muscles lateral - Right
+Anatomic;Muscle;Pterygoid;Head and Neck;Pterygoid_Med_L;Pterygoid muscles medial - Left
+Anatomic;Muscle;Pterygoid;Head and Neck;Pterygoid_Med_R;Pterygoid muscles medial - Right
+Target;PTV;;Body;PTV;Planning Target Volume
+Anatomic;Bone;Pubic;Pelvis;PubicSymphys;Pubic Symphysis
+Anatomic;Bone;Pubic;Pelvis;PubicSymphys_L;Pubic bone Left
+Anatomic;Bone;Pubic;Pelvis;PubicSymphys_R;Pubic bone Right
+Anatomic;Bone;Radius;Limb;Radius_L;Radius Left
+Anatomic;Bone;Radius;Limb;Radius_R;Radius Right
+Anatomic;Rectum;;Pelvis;Rectal_Wall;Rectal Wall
+Anatomic;Rectum;;Pelvis;Rectum;Large bowel - Rectum
+Anatomic;Eye;Retina;Head and Neck;Retina_L;Retina Left
+PRV;Eye;Retina;Head and Neck;Retina_PRVxx_L;Retina_PRVxx_L
+PRV;Eye;Retina;Head and Neck;Retina_PRVxx_R;PRV constructed as xx millimeter expansion on Retina
+Anatomic;Eye;Retina;Head and Neck;Retina_R;Retina Right
+Anatomic;Eye;Retina;Head and Neck;Retinas;Both Retinas
+Anatomic;Bone;Rib;Thorax;Rib;Any Rib volume
+Anatomic;Bone;Rib;Thorax;Rib01_L;First Rib Left
+Anatomic;Bone;Rib;Thorax;Rib01_R;First Rib Right
+Anatomic;Bone;Rib;Thorax;Rib02_L;Second rib Left
+Anatomic;Bone;Rib;Thorax;Rib02_R;Second rib Right
+Anatomic;Bone;Rib;Thorax;Rib03_L;Third rib Left
+Anatomic;Bone;Rib;Thorax;Rib03_R;Third rib Right
+Anatomic;Bone;Rib;Thorax;Rib04_L;Fourth rib Left
+Anatomic;Bone;Rib;Thorax;Rib04_R;Fourth rib Right
+Anatomic;Bone;Rib;Thorax;Rib05_L;Fifth rib Left
+Anatomic;Bone;Rib;Thorax;Rib05_R;Fifth rib Right
+Anatomic;Bone;Rib;Thorax;Rib06_L;Sixth rib Left
+Anatomic;Bone;Rib;Thorax;Rib06_R;Sixth rib Right
+Anatomic;Bone;Rib;Thorax;Rib07_L;Seventh rib Left
+Anatomic;Bone;Rib;Thorax;Rib07_R;Seventh rib Right
+Anatomic;Bone;Rib;Thorax;Rib08_L;Eighth rib Left
+Anatomic;Bone;Rib;Thorax;Rib08_R;Eighth rib Right
+Anatomic;Bone;Rib;Thorax;Rib09_L;Ninth rib Left
+Anatomic;Bone;Rib;Thorax;Rib09_R;Ninth rib Right
+Anatomic;Bone;Rib;Thorax;Rib10_L;Tenth rib Left
+Anatomic;Bone;Rib;Thorax;Rib10_R;Tenth rib Right
+Anatomic;Bone;Rib;Thorax;Rib11_L;Eleventh rib Left
+Anatomic;Bone;Rib;Thorax;Rib11_R;Eleventh rib Right
+Anatomic;Bone;Rib;Thorax;Rib12_L;Twelfth rib Left
+Anatomic;Bone;Rib;Thorax;Rib12_R;Twelfth rib Right
+Anatomic;Nerve;Sacrum;Pelvis;SacralPlex;Sacral Plexus
+Anatomic;Bone;Spine;Pelvis;Sacrum;Sacrum
+Anatomic;Skin;;Head and Neck;Scalp;Scalp
+Anatomic;Bone;Scapula;Thorax;Scapula_L;Scapula Left
+Anatomic;Bone;Scapula;Thorax;Scapula_R;Scapula Right
+Anatomic;Skin;;Body;Scar;Scar
+Anatomic;Skin;;Body;Scar_Boost;Scar_Boost
+Anatomic;Skin;;Pelvis;Scrotum;Scrotum (skin & cremasteric fascia)
+Anatomic;Gland;;Pelvis;SeminalVes;Seminal vesicle
+Anatomic;Gland;;Pelvis;SeminalVes_Dist;Distal Seminal Vesicle
+Anatomic;Gland;;Pelvis;SeminalVes_Prox;Proximal Seminal Vesicle
+Anatomic;Sinus;Ethmoid;Head and Neck;Sinus_Ethmoid;Ethmoidal Sinus
+Anatomic;Brain;Sinus;Head and Neck;Sinus_Frontal;Frontal Sinus
+Anatomic;Brain;Sinus;Head and Neck;Sinus_Frontal_L;Frontal Sinus Left
+Anatomic;Brain;Sinus;Head and Neck;Sinus_Frontal_R;Frontal Sinus Right
+Anatomic;Sinus;Maxillary;Head and Neck;Sinus_Maxilry;Maxillary Sinus
+Anatomic;Sinus;Maxillary;Head and Neck;Sinus_Maxilry_L;Maxillary Sinus
+Anatomic;Sinus;Maxillary;Head and Neck;Sinus_Maxilry_R;Maxillary Sinus
+Anatomic;Bone;Sphenoid;Head and Neck;Sinus_Sphenoid;Sphenoidal Sinus
+Anatomic;Bone;Sphenoid;Head and Neck;Sinus_Sphenoid_L;Sphenoidal Sinus Left
+Anatomic;Bone;Sphenoid;Head and Neck;Sinus_Sphenoid_R;Sphenoidal Sinus Right
+Anatomic;Skin;;Body;Skin;Skin
+Anatomic;Skin;;Pelvis;Skin_Perineum;Skin_Perineum
+Anatomic;Skin;;Abdomen;Skin_Peritoneum;Skin_Peritoneum
+Anatomic;Bone;Skull;Head and Neck;Skull;Skeletal system of head
+Anatomic;Space;;Body;Spc;Space
+Anatomic;Bowel;Space;Abdomen;Spc_Bowel;Space occupied by bowel
+Anatomic;Space;;Abdomen;Spc_Bowel_Small;Spc_Bowel_Small
+Anatomic;Space;Retropharyngeal;Head and Neck;Spc_Retrophar_L;Retropharyngeal space Left
+Anatomic;Space;Retropharyngeal;Head and Neck;Spc_Retrophar_R;Retropharyngeal space Right
+Anatomic;Space;;Head and Neck;Spc_Retrophars;Retropharyngeal space
+Anatomic;Space;Retrostyloid;Head and Neck;Spc_Retrosty;Retrostyloid space
+Anatomic;Space;Retrostyloid;Head and Neck;Spc_Retrosty_L;Retrostyloid space -Left
+Anatomic;Space;Retrostyloid;Head and Neck;Spc_Retrosty_R;Retrostyloid space -Left
+Anatomic;Space;Supraclavicular;Thorax;Spc_Supraclav_L;Supraclavicular space - Left
+Anatomic;Space;Supraclavicular;Thorax;Spc_Supraclav_R;Supraclavicular space - Right
+Anatomic;Bowel;Anus;Pelvis;Sphincter_Anal;Internal Anal Sphincter
+Anatomic;Canal;Spinal Cord;Body;SpinalCanal;Vertebral canal
+PRV;PRV;Spinal Canal;Body;SpinalCanal_PRV;SpinalCanal_PRV
+PRV;PRV;Spinal Canal;Body;SpinalCanal_PRVx;A PRV created with an x millimeter expansion on the spinal canal
+Anatomic;Nerve;Spinal Cord;Body;SpinalCord;Spinal Cord
+Anatomic;Nerve;Spinal Cord;Head and Neck;SpinalCord_Cerv;Spinal Cord Cervical
+Anatomic;Nerve;Spinal Cord;Abdomen;SpinalCord_Lum;Spinal Cord Lumbar
+PRV;PRV;Spinal Cord;Body;SpinalCord_PRV;SpinalCord_PRV
+PRV;PRV;Spinal Cord;Body;SpinalCord_PRVxx;A PRV created with an xx millimeter expansion on the spinal cord
+Anatomic;Nerve;Spinal Cord;Pelvis;SpinalCord_Sac;Spinal Cord Sacral
+Anatomic;Nerve;Spinal Cord;Thorax;SpinalCord_Thor;Spinal Cord Thoracic
+Anatomic;Lymph Node;Spleen;Abdomen;Spleen;Spleen
+Anatomic;Lymph Node;Spleen;Abdomen;Spleen_Hilum;Splenic hilum
+Anatomic;Reproductive;;Pelvis;Spongiosum;Penis Corpus Spongiosum
+Anatomic;Ear;Stapes;Head and Neck;Stapes;Stapes
+Anatomic;Ear;Stapes;Head and Neck;Stapes_L;Stapes Left
+Anatomic;Ear;Stapes;Head and Neck;Stapes_R;Stapes Right
+Anatomic;Stomach;;Abdomen;Stomach;Stomach
+PRV;Stomach;;Abdomen;Stomach_PRVxx;PRV created with xx mm expansion on the stomach
+Anatomic;Body;;Body;Strct;Structure
+Anatomic;Joint;;Limb;Strct_Suprapatel;Suprapatellar Structures
+Anatomic;Eye;;;Surf_Eye;Surf_Eye
+Anatomic;Surgery;;Body;SurgicalBed;SurgicalBed
+Anatomic;Brain;;Head and Neck;Sys_Ventricular;Sys_Ventricular
+Anatomic;Tendon;;Limb;Tendon;Tendon
+Anatomic;Tendon;;Limb;Tendon_Quad;Tendon_Quad
+Anatomic;Reproductive;Testis;Pelvis;Testis;Testis
+Anatomic;Reproductive;Testis;Pelvis;Testis_L;Testis Left
+Anatomic;Reproductive;Testis;Pelvis;Testis_R;Testis Right
+Anatomic;Membrane;Thecal Sac;Body;ThecalSac;ThecalSac
+Anatomic;Duct;Thoracic;Thorax;Thoracic_Duct;Thoracic Duct
+Anatomic;Mouth;Tongue;Head and Neck;Tongue;Tongue
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_All;Tongue_All
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_Base;Tongue_Base
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_Base_L;Tongue_Base_L
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_Base_R;Tongue_Base_R
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_Oral;Tongue_Oral
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_Oral_L;Tongue_Oral_L
+Anatomic;Mouth;Tongue;Head and Neck;Tongue_Oral_R;Tongue_Oral_R
+Anatomic;Mouth;Tongue;Head and Neck;Tonsil;Tonsil
+Anatomic;Lung;Trachea;Thorax;Trachea;Trachea
+Anatomic;Lung;Trachea;Thorax;Trachea_NAdj;Trachea non adjacent wall
+Non_Anatomic;Surgery;;Body;TumorBed;Tumor Bed
+Anatomic;Urinary;Ureter;Pelvis;Ureter_L;Ureter Left
+Anatomic;Urinary;Ureter;Pelvis;Ureter_R;Ureter Right
+Anatomic;Urinary;Ureter;Pelvis;UreterDivert;Urinary Divergence
+Anatomic;Urinary;Ureter;Pelvis;Ureters;Both Ureters
+Anatomic;Urinary;Urethra;Pelvis;Urethra;Urethra
+Anatomic;Urinary;Urethra;Pelvis;Urethra_Prostatc;Prostatic Urethra
+Anatomic;Reproductive;Uterus;Pelvis;Uterus;Uterus
+Anatomic;Vein;Azygos;Thorax;V_Azygos;Azygos Vein
+Anatomic;Vein;Brachiocephalic;Thorax;V_Brachioceph_L;Brachiocephalic vein Left
+Anatomic;Vein;Brachiocephalic;Thorax;V_Brachioceph_R;Brachiocephalic vein Right
+Anatomic;Vein;Iliac;Pelvis;V_Iliac_Ext_L;External iliac vein Left
+Anatomic;Vein;Iliac;Pelvis;V_Iliac_Ext_R;External iliac vein Right
+Anatomic;Vein;Iliac;Pelvis;V_Iliac_Int_L;Internal iliac vein Left
+Anatomic;Vein;Iliac;Pelvis;V_Iliac_Int_R;Internal iliac vein Right
+Anatomic;Vein;Iliac;Pelvis;V_Iliac_L;Common iliac vein Right
+Anatomic;Vein;Iliac;Pelvis;V_Iliac_R;Common iliac vein Left
+Anatomic;Vein;Jugular;Head and Neck;V_Jugular;Any Jugular Vein
+Anatomic;Vein;Jugular;Head and Neck;V_Jugular_Ext_L;V_Jugular_Ext_L
+Anatomic;Vein;Jugular;Head and Neck;V_Jugular_Ext_R;V_Jugular_Ext_R
+Anatomic;Vein;Jugular;Head and Neck;V_Jugular_Int_L;Internal jugular vein Right
+Anatomic;Vein;Jugular;Head and Neck;V_Jugular_Int_R;Internal jugular vein Left
+Anatomic;Vein;Portal;Abdomen;V_Portal;Portal Vein
+Anatomic;Vein;Pulmonary;Thorax;V_Pulmonary;Pulmonary vein
+Anatomic;Vein;Subclavian;Thorax;V_Subclavian_L;Subclavian Vein Left
+Anatomic;Vein;Subclavian;Thorax;V_Subclavian_R;Subclavian Vein Right
+Anatomic;Vein;Subclavian;Thorax;V_Subclavians;Subclavian Vein
+Anatomic;Vein;VenaCava;Thorax;V_Venacava_I;Inferior vena cava
+Anatomic;Vein;VenaCava;Thorax;V_Venacava_S;Superior vena cava
+Anatomic;Reproductive;Vagina;Pelvis;Vagina;Vagina
+Anatomic;Reproductive;Vagina;Pelvis;Vagina_Surf;Vagina_Surf
+Anatomic;Reproductive;Vagina;Pelvis;VaginalCuff;Vaginal Cuff
+Anatomic;Valve;;Body;Valve;Valve
+Anatomic;Valve;Aorta;Thorax;Valve_Aortic;Aortic Valve
+Anatomic;Valve;Heart;Thorax;Valve_Mitral;Mitral Valve
+Anatomic;Valve;;Thorax;Valve_Pulmonic;Pulmonic Valve
+Anatomic;Valve;Heart;Thorax;Valve_Tricuspid;Tricuspid Valve
+Anatomic;Bone;Vertebral Body;Body;VB;Vertebral Body
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C;Cervical vertebrae
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C1;Atlas - C1
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C2;Axis - C2
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C3;Cervical vertebra - C3
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C4;Cervical vertebra - C4
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C5;Cervical vertebra - C5
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C6;Cervical vertebra - C6
+Anatomic;Bone;Vertebral Body;Head and Neck;VB_C7;Cervical vertebra - C7
+Anatomic;Bone;Spine;Abdomen;VB_L;Lumbar Vertebrae
+Anatomic;Bone;Spine;Abdomen;VB_L1;Lumbar Vertebra L1
+Anatomic;Bone;Spine;Abdomen;VB_L2;Lumbar Vertebra L2
+Anatomic;Bone;Spine;Abdomen;VB_L3;Lumbar Vertebra L3
+Anatomic;Bone;Spine;Abdomen;VB_L4;Lumbar Vertebra L4
+Anatomic;Bone;Spine;Abdomen;VB_L5;Lumbar Vertebra L5
+Anatomic;Bone;Spine;Pelvis;VB_S;Sacral Vertebra
+Anatomic;Bone;Spine;Pelvis;VB_S1;Sacral Vertebra S1
+Anatomic;Bone;Spine;Pelvis;VB_S2;Sacral Vertebra S2
+Anatomic;Bone;Spine;Pelvis;VB_S3;Sacral Vertebra S3
+Anatomic;Bone;Spine;Pelvis;VB_S4;Sacral Vertebra S4
+Anatomic;Bone;Spine;Pelvis;VB_S5;Sacral Vertebra S5
+Anatomic;Bone;Spine;Thorax;VB_T;Thoracic Vertebra
+Anatomic;Bone;Spine;Thorax;VB_T01;Thoracic Vertebra T1
+Anatomic;Bone;Spine;Thorax;VB_T02;Thoracic Vertebra T2
+Anatomic;Bone;Spine;Thorax;VB_T03;Thoracic Vertebra T3
+Anatomic;Bone;Spine;Thorax;VB_T04;Thoracic Vertebra T4
+Anatomic;Bone;Spine;Thorax;VB_T05;Thoracic Vertebra T5
+Anatomic;Bone;Spine;Thorax;VB_T06;Thoracic Vertebra T6
+Anatomic;Bone;Spine;Thorax;VB_T07;Thoracic Vertebra T7
+Anatomic;Bone;Spine;Thorax;VB_T08;Thoracic Vertebra T8
+Anatomic;Bone;Spine;Thorax;VB_T09;Thoracic Vertebra T9
+Anatomic;Bone;Spine;Thorax;VB_T10;Thoracic Vertebra T10
+Anatomic;Bone;Spine;Thorax;VB_T11;Thoracic Vertebra T11
+Anatomic;Bone;Spine;Thorax;VB_T12;Thoracic Vertebra T12
+Anatomic;Bone;Vertebral Body;Body;VBs;Vertebral Bodies
+Anatomic;Heart;Ventricle;Thorax;Ventricle;Ventricle (cardiac)
+Anatomic;Heart;Ventricle;Thorax;Ventricle_L;Ventricle (cardiac) Left
+Anatomic;Heart;Ventricle;Thorax;Ventricle_R;Ventricle (cardiac) Right
+Anatomic;Larynx;;Head and Neck;VocalCord_L;VocalCord_L
+Anatomic;Larynx;;Head and Neck;VocalCord_R;VocalCord_R
+Anatomic;Larynx;;Head and Neck;VocalCords;Vocal Cords
+Anatomic;Bone;Vomer;Head and Neck;Vomer;Vomer
+Anatomic;Reproductive;Vulva;Pelvis;Vulva;Vulva
+Anatomic;Reproductive;Vagina;Pelvis;Wall_Vagina;Wall of vagina

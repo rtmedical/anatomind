@@ -1,0 +1,26 @@
+# Arquivos e pastas desnecessários para ignorar no Git
+
+# Build do Rust
+tg263/target/
+
+tg263/tgi/model/
+# Backups
+*.backup
+
+# Arquivos de cache e info do Rust
+.rustc_info.json
+CACHEDIR.TAG
+.cargo-lock
+
+# Builds incrementais e fingerprints
+incremental/
+.fingerprint/
+
+# Arquivos de ambiente locais (opcional, descomente se necessário)
+# .env
+
+# Outros caches comuns
+__pycache__/
+*.log
+*.tmp
+.DS_Store

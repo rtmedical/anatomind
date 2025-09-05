@@ -1,0 +1,26 @@
+FROM ghcr.io/huggingface/text-generation-inference:3.0
+
+# Recompilação sem flash-attention para Tesla P40 (Pascal SM 6.1)
+RUN pip uninstall -y flash-attn flashinfer || true
+
+# Forçar instalação do PyTorch sem flash-attention
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --force-reinstall
+
+# Copiar modelo customizado
+COPY model /opt/model/
+
+# Configurações específicas para Tesla P40
+ENV TORCH_CUDA_ARCH_LIST="6.1"
+ENV PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+ENV CUDA_LAUNCH_BLOCKING="1"
+ENV TGI_DISABLE_TELEMETRY="1"
+ENV TRANSFORMERS_OFFLINE="1" 
+ENV HF_HUB_OFFLINE="1"
+ENV FLASH_ATTENTION_FORCE_DISABLE="1"
+ENV FLASHINFER_FORCE_DISABLE="1"
+ENV DISABLE_FLASHINFER="1"
+ENV DISABLE_FLASH_ATTENTION="1"
+ENV TORCH_BACKENDS_CUDA_ENABLE_FLASH_ATTENTION="0"
+ENV ATTN_IMPLEMENTATION="eager"
+
+WORKDIR /opt
