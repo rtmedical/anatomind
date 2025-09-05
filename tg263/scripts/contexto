@@ -1,37 +1,1483 @@
-Perfeita análise! Vamos testar o TGI 3.0 que pode ter flash-attention compilada para SM 6.1, e também tentar forçar o desligamento da flash-attention. Vou criar um teste abrangente:
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+<IMPORTANTE> USEI ESSE SCRIPT PARA TREINAR O MODELO TG-263 COM DEEPSEEK. e a saida do modelo está na pasta </IMPORTANTE> 
+Fine-tuning para mapeamento de estruturas anatômicas → TG-263
+================================================================
 
-test_tgi_versions.sh foi criado
-cd /home/rt/anatomind/tg263 && chmod +x scripts/test_tgi_versions.sh && ./scripts/test_tgi_versions.sh
-🎯 RESULTADOS IMPORTANTES IDENTIFICADOS!
-Descobertas Cruciais:
-✅ TGI 3.0 CARREGOU MODELO: DialoGPT-small foi carregado com sucesso, mas falhou por validação de argumentos
-❌ TGI 3.2 PERSISTE ERRO: Mesmo problema de flash-attention kernels
-Problemas Específicos:
-TGI 3.0: max_batch_prefill_tokens (4096) > max_batch_total_tokens (512) - erro de configuração TGI 3.2: Ainda o mesmo erro de kernel flash-attention
+Este script treina (via LoRA/PEFT) um LLM para traduzir nomes de estruturas em
+várias línguas/abreviações para o padrão TG-263, com as seguintes premissas:
 
-Vamos testar TGI 3.0 com parâmetros corretos:
+1) A loss é calculada **somente na parte "Output:"** do template (instrução + rótulo).
+2) Durante inferência, o **constrained decoding** via **trie** restringe a saída
+   aos rótulos válidos do CSV de referência (coluna “TG263-Primary Name”).
+3) Uma verificação de **confiança** (limiar de log-prob média por token) permite
+   **rejeitar** entradas fora do TG e retornar `"NOT FOUND"`.
+4) Salva o modelo no formato Hugging Face em **3 modos**: `adapters`, `merged` ou `both`.
+5) (Opcional) Upload direto ao **Hugging Face Hub**.
 
-test_tgi30_final.sh foi criado
-cd /home/rt/anatomind/tg263 && chmod +x scripts/test_tgi30_final.sh && ./scripts/test_tgi30_final.sh
-🎉 SUCESSO TOTAL! PROBLEMA RESOLVIDO!
-✅ CONFIRMAÇÃO DEFINITIVA:
-TGI 3.0 FUNCIONA PERFEITAMENTE na Tesla P40:
+Uso (exemplos):
+---------------
+Treinar e salvar adapters:
+    python3 training_DeepSeek.py \
+      --data_json names_training_corrected.json \
+      --tg_csv TG263.csv \
+      --model_name deepseek-ai/DeepSeek-R1-Distill-Llama-8B \
+      --out_dir ./modelo_tg263_DeepSeek \
+      --save_mode adapters
 
-✅ Health check passou
-✅ Geração de texto funcionando ("Hello" → " mathematik's")
-✅ API respondendo normalmente
-✅ Sem erros de flash-attention
-🎯 SOLUÇÃO IMPLEMENTADA:
-Vamos fazer o rebuild da sua imagem customizada usando TGI 3.0:
-cd /home/rt/anatomind/tg263 && cp /tmp/Dockerfile.tgi30 tgi/Dockerfile
-Agora precisamos copiar o modelo para o contexto de build. Primeiro, vamos verificar onde está o modelo:
-cd /home/rt/anatomind/tg263 && docker run --rm --entrypoint=/bin/bash rtmedical/anatomind-engine:Llama-8B-TGI -c "ls -la /opt/model | head -10"
-Vamos extrair o modelo da imagem atual para poder usá-lo na nova build:
-cd /home/rt/anatomind/tg263/tgi && docker run --rm -v $(pwd):/backup rtmedical/anatomind-engine:Llama-8B-TGI cp -r /opt/model /backup/
-cd /home/rt/anatomind/tg263/tgi && docker run --rm --entrypoint=/bin/bash -v $(pwd):/backup rtmedical/anatomind-engine:Llama-8B-TGI -c "cp -r /opt/model /backup/"
+Treinar, salvar modelo mesclado e subir ao Hub:
+    python3 training_DeepSeek.py \
+      --data_json names_training_corrected.json \
+      --tg_csv TG263.csv \
+      --model_name deepseek-ai/DeepSeek-R1-Distill-Llama-8B \
+      --out_dir ./modelo_tg263_DeepSeek \
+      --save_mode merged \
+      --push_to_hub \
+      --hub_repo_id seu-usuario/seu-modelo-tg263
 
-cd /home/rt/anatomind/tg263/tgi && ls -la model/ | head -5
+Apenas avaliar um modelo com adapters já treinados:
+    python3 training_DeepSeek.py \
+      --data_json names_validation.json \
+      --tg_csv TG263.csv \
+      --model_name deepseek-ai/DeepSeek-R1-Distill-Llama-8B \
+      --load_adapters ./modelo_tg263_DeepSeek \
+      --eval_only
 
-Perfeito! Agora vamos construir a nova imagem com TGI 3.0:
+Observações de compatibilidade:
+-------------------------------
+- Em GPUs como P40 , **carregamos o modelo em FP16** e **não** ligamos `fp16=True`
+  no Trainer, para evitar o erro "Attempting to unscale FP16 gradients".
+- O trie usa a tokenização de `" " + label` (um espaço antes) para casar com o prompt
+  `"Output: "` — isto é crucial para o constrained decoding funcionar.
+"""
 
-cd /home/rt/anatomind/tg263/tgi && docker build -t rtmedical/anatomind-engine:Llama-8B-TGI-3.0 .
+import os
+import re
+import csv
+import json
+import random
+import argparse
+from io import StringIO
+from collections import Counter
+from typing import List, Tuple, Dict, Optional
+
+import torch
+import pandas as pd
+from datasets import Dataset
+from rapidfuzz import process, fuzz
+
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    Trainer,
+    TrainingArguments,
+    DefaultDataCollator,
+    EarlyStoppingCallback,
+)
+
+# PEFT (LoRA)
+from peft import (
+    LoraConfig,
+    get_peft_model,
+    PeftModel,
+)
+
+# (Opcional) Upload ao Hugging Face Hub
+try:
+    from huggingface_hub import create_repo, upload_folder
+    _HF_AVAILABLE = True
+except Exception:
+    _HF_AVAILABLE = False
+
+
+# =============================================================================
+# Utilidades gerais
+# =============================================================================
+
+def set_seed(seed: int = 42):
+    """Define sementes determinísticas (CPU/GPU/Numpy) para reprodutibilidade básica."""
+    import numpy as np
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    try:
+        np.random.seed(seed)
+    except Exception:
+        pass
+
+
+def log(msg: str):
+    """Log simples com flush imediato (útil em Docker, tmux, etc.)."""
+    print(msg, flush=True)
+
+
+def human_bytes(n: int) -> str:
+    """Formata bytes em unidades humanas para logs de memória."""
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if n < 1024:
+            return f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} PB"
+
+
+# =============================================================================
+# Estruturas de suporte (Trie para constrained decoding)
+# =============================================================================
+
+class Trie:
+    """
+    Trie mínima para restringir tokens. Cada caminho completo termina em `self.end`.
+    """
+    def __init__(self):
+        self.root: Dict[int, dict] = {}
+        self.end = "_end_"
+
+    def insert(self, token_ids: List[int]):
+        node = self.root
+        for tid in token_ids:
+            node = node.setdefault(tid, {})
+        node[self.end] = True
+
+
+def build_label_trie(tokenizer, labels: List[str]) -> Trie:
+    """
+    Constrói o trie com as labels TG-263 tokenizadas **como na geração**.
+    Importante: usamos `" " + label` para casar com o espaço após "Output: ".
+    """
+    trie = Trie()
+    for lab in labels:
+        ids = tokenizer(" " + lab, add_special_tokens=False)["input_ids"]
+        trie.insert(ids)
+    return trie
+
+
+# =============================================================================
+# Leitura de dados e labels
+# =============================================================================
+
+def load_sanitized_json(path_json: str) -> List[Dict[str, str]]:
+    """
+    Lê um JSON com objetos { "name_in": "...", "tg263_name": "..." }.
+    - Remove entradas inválidas/ vazias.
+    """
+    with open(path_json, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    valid = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        name_in = str(item.get("name_in", "")).strip()
+        tg_name = str(item.get("tg263_name", "")).strip()
+        if name_in and tg_name:
+            valid.append({"name_in": name_in, "tg263_name": tg_name})
+    log(f"✓ Dados válidos lidos: {len(valid)}")
+    return valid
+
+
+def load_label_set(path_csv: str, column: str = "TG263-Primary Name") -> List[str]:
+    """
+    Leitura robusta e SEGURA do CSV/XLSX dos rótulos TG-263.
+    
+    CORREÇÕES IMPLEMENTADAS:
+    - Detecção automática de separador com validação
+    - Checks de sanidade obrigatórios nas labels extraídas  
+    - Abort se labels contiverem caracteres inválidos como ';'
+    - Validação de formato e comprimento das labels
+    - Logs detalhados para debugging
+    """
+    ext = os.path.splitext(path_csv)[1].lower()
+
+    def _norm(s: str) -> str:
+        return (
+            str(s).replace("\ufeff", "").strip().lower()
+            .replace("-", "").replace("_", "").replace(" ", "")
+        )
+
+    log(f"🔍 Lendo arquivo TG-263: {path_csv}")
+    
+    # Estratégia de leitura mais robusta
+    df = None
+    separator_used = None
+    
+    if ext in [".xlsx", ".xls"]:
+        df = pd.read_excel(path_csv)
+        separator_used = "Excel"
+    else:
+        # 1) Primeiro, detectar o separador correto analisando algumas linhas
+        with open(path_csv, "r", encoding="utf-8-sig") as f:
+            sample_lines = [f.readline().strip() for _ in range(3)]
+        
+        semicolon_count = sum(line.count(';') for line in sample_lines)
+        comma_count = sum(line.count(',') for line in sample_lines)
+        
+        log(f"📊 Análise de separadores: ';'={semicolon_count}, ','={comma_count}")
+        
+        # 2) Tentar com o separador mais provável primeiro
+        if semicolon_count > comma_count:
+            try:
+                df = pd.read_csv(
+                    path_csv, sep=";", engine="python",
+                    encoding="utf-8-sig", quoting=csv.QUOTE_MINIMAL,
+                    skip_blank_lines=True, on_bad_lines='skip'  # CORREÇÃO: Pular linhas malformadas
+                )
+                separator_used = ";"
+                log(f"✅ CSV lido com separador ';'")
+            except Exception as e:
+                log(f"❌ Falha com ';': {e}")
+                df = None
+        
+        # 3) Se falhou ou comma_count maior, tentar vírgula
+        if df is None:
+            try:
+                df = pd.read_csv(
+                    path_csv, sep=",", engine="python",
+                    encoding="utf-8-sig", quoting=csv.QUOTE_MINIMAL,
+                    skip_blank_lines=True, on_bad_lines='skip'  # CORREÇÃO: Pular linhas malformadas
+                )
+                separator_used = ","
+                log(f"✅ CSV lido com separador ','")
+            except Exception as e:
+                log(f"❌ Falha com ',': {e}")
+                df = None
+        
+        # 4) Fallback: autodetect
+        if df is None:
+            try:
+                df = pd.read_csv(
+                    path_csv, sep=None, engine="python",
+                    encoding="utf-8-sig", quoting=csv.QUOTE_MINIMAL,
+                    skip_blank_lines=True, on_bad_lines='skip'  # CORREÇÃO: Pular linhas malformadas
+                )
+                separator_used = "autodetect"
+                log(f"✅ CSV lido com autodetect")
+            except Exception as e:
+                raise ValueError(f"Impossível ler CSV com nenhum separador. Erro: {e}")
+
+    if df is None or df.empty:
+        raise ValueError(f"DataFrame vazio ou inválido após leitura de {path_csv}")
+
+    # Sanitiza nomes de colunas
+    log(f"📋 Colunas originais: {list(df.columns)}")
+    df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
+    log(f"📋 Colunas sanitizadas: {list(df.columns)}")
+    
+    # Busca da coluna target
+    wanted_norm = _norm(column)
+    candidates = {_norm(c): c for c in df.columns}
+
+    tg_col = None
+    if wanted_norm in candidates:
+        tg_col = candidates[wanted_norm]
+        log(f"✅ Coluna encontrada por match exato: '{tg_col}'")
+    else:
+        # Heurística melhorada
+        for c in df.columns:
+            n = _norm(c)
+            if ("tg263" in n and "primary" in n and "name" in n) or \
+               ("primary" in n and "name" in n) or \
+               ("tg263" in n and "name" in n):
+                tg_col = c
+                log(f"✅ Coluna encontrada por heurística: '{tg_col}'")
+                break
+        
+        if tg_col is None:
+            raise ValueError(f"❌ Coluna '{column}' não encontrada. Colunas disponíveis: {list(df.columns)}")
+
+    # Extração das labels COM VALIDAÇÃO CRÍTICA
+    log(f"🎯 Extraindo labels da coluna: '{tg_col}'")
+    raw_labels = df[tg_col].dropna().astype(str).tolist()
+    log(f"📈 Labels brutas extraídas: {len(raw_labels)}")
+    
+    # CHECKS DE SANIDADE OBRIGATÓRIOS
+    valid_labels = []
+    invalid_count = 0
+    
+    for i, label in enumerate(raw_labels):
+        # Limpar espaços e BOM
+        clean_label = label.replace("\ufeff", "").strip()
+        
+        # VALIDAÇÕES CRÍTICAS
+        if not clean_label:
+            log(f"⚠️  Label vazia na linha {i+2}")
+            invalid_count += 1
+            continue
+            
+        # CRÍTICO: Detectar se a label contém separadores (indicando linha inteira)
+        if ';' in clean_label or ',' in clean_label:
+            log(f"❌ ERRO CRÍTICO: Label contém separadores (linha inteira capturada): '{clean_label[:100]}...'")
+            log(f"❌ Isso indica que a coluna errada foi selecionada ou o CSV está mal formatado!")
+            raise ValueError(f"Label inválida detectada com separadores: '{clean_label[:50]}...' "
+                           f"Verifique se a coluna '{tg_col}' está correta e se o separador é '{separator_used}'")
+        
+        # Validar comprimento (labels TG-263 são tipicamente < 50 caracteres)
+        if len(clean_label) > 100:
+            log(f"⚠️  Label suspeita muito longa ({len(clean_label)} chars): '{clean_label[:50]}...'")
+            invalid_count += 1
+            continue
+            
+        # Validar caracteres básicos (TG-263 usa A-Z, a-z, 0-9, _, -)
+        if not re.match(r'^[A-Za-z0-9_\-\s]+$', clean_label):
+            log(f"⚠️  Label com caracteres suspeitos: '{clean_label}'")
+            # Não bloquear, mas reportar
+        
+        valid_labels.append(clean_label)
+    
+    # Remover duplicatas e ordenar
+    unique_labels = sorted(list(set(valid_labels)), key=len)
+    
+    # VALIDAÇÃO FINAL OBRIGATÓRIA
+    if len(unique_labels) == 0:
+        raise ValueError("❌ Nenhuma label válida encontrada após validação!")
+    
+    if len(unique_labels) < 50:
+        log(f"⚠️  Poucas labels encontradas ({len(unique_labels)}). Esperado: 500-800 para TG-263 completo.")
+    
+    if invalid_count > 0:
+        log(f"⚠️  {invalid_count} labels inválidas foram descartadas")
+    
+    # Log de amostras para validação visual
+    log(f"✅ Labels TG-263 válidas carregadas: {len(unique_labels)} (coluna: '{tg_col}', sep: '{separator_used}')")
+    log("📋 Primeiras 10 labels:")
+    for label in unique_labels[:10]:
+        log(f"  • {label}")
+    log("📋 Últimas 5 labels:")
+    for label in unique_labels[-5:]:
+        log(f"  • {label}")
+        
+    # Verificação adicional: garantir que temos labels típicas do TG-263
+    expected_samples = ['Kidney_L', 'Kidney_R', 'Heart', 'Brain', 'Liver', 'Lung_L', 'Lung_R']
+    found_samples = [label for label in expected_samples if label in unique_labels]
+    if len(found_samples) < 2:
+        log(f"⚠️  AVISO: Poucas labels TG-263 típicas encontradas: {found_samples}")
+        log(f"⚠️  Verifique se as labels são realmente do padrão TG-263")
+    else:
+        log(f"✅ Labels TG-263 típicas encontradas: {found_samples}")
+    
+    return unique_labels
+
+
+# =============================================================================
+# Preparação de templates/datasets
+# =============================================================================
+
+TEMPLATE = "Input: {x}\nOutput: {y}\n"
+
+def make_text(x: str, y: str) -> str:
+    """Formata um exemplo no template simples."""
+    return TEMPLATE.format(x=x, y=y)
+
+
+def build_datasets(
+    dados: List[Dict[str, str]],
+    split_ratio: float = 0.85,
+    seed: int = 42,
+    label_whitelist: Optional[List[str]] = None,
+) -> Tuple[Dataset, Dataset]:
+    """
+    Constrói datasets de treino/validação com *remapeamento* opcional de rótulos para o conjunto TG.
+
+    - Se `label_whitelist` for fornecida, rótulos que não estiverem nela são
+      mapeados ao mais próximo via rapidfuzz (WRatio). Se nada conseguir, descarta o exemplo.
+    - Em seguida, embaralha e faz split.
+    """
+    random_gen = random.Random(seed)
+    texts = []
+    remapped, dropped = 0, 0
+
+    for it in dados:
+        x = str(it["name_in"]).strip()
+        y = str(it["tg263_name"]).strip()
+
+        if label_whitelist is not None and y not in label_whitelist:
+            match = process.extractOne(y, label_whitelist, scorer=fuzz.WRatio)
+            if match:
+                y = match[0]
+                remapped += 1
+            else:
+                dropped += 1
+                continue
+
+        texts.append(make_text(x, y))
+
+    if remapped:
+        log(f"ℹ️ {remapped} rótulos remapeados para o TG-263 por similaridade fuzzy.")
+    if dropped:
+        log(f"⚠️ {dropped} exemplos descartados por não casar com o TG-263.")
+
+    random_gen.shuffle(texts)
+    split_idx = int(split_ratio * len(texts)) if texts else 0
+
+    train_texts = texts[:split_idx]
+    val_texts = texts[split_idx:]
+
+    train_ds = Dataset.from_dict({'text': train_texts})
+    val_ds = Dataset.from_dict({'text': val_texts})
+
+    return train_ds, val_ds
+
+
+def tokenize_with_output_only_labels(batch, tokenizer, max_len=128):
+    """
+    Tokeniza e aplica máscara de loss **somente** nos tokens após 'Output: '.
+
+    CORREÇÕES IMPLEMENTADAS:
+    - Consistência de add_special_tokens entre prefixo e texto completo
+    - Cálculo preciso de prefix_len considerando tokenização exata
+    - Validação de alinhamento de tokens
+    - Logs de debug para verificar se a máscara está correta
+    """
+    input_ids_list, attention_mask_list, labels_list = [], [], []
+    
+    debug_first = True  # Log apenas do primeiro exemplo para verificação
+
+    for idx, txt in enumerate(batch["text"]):
+        # CORREÇÃO: Usar add_special_tokens=True consistentemente
+        enc = tokenizer(txt, truncation=True, padding="max_length", 
+                       max_length=max_len, add_special_tokens=True, return_tensors="pt")
+        ids = enc["input_ids"].squeeze(0).tolist()
+        att = enc["attention_mask"].squeeze(0).tolist()
+
+        # CORREÇÃO: Calcular prefix_len de forma mais robusta
+        try:
+            # Encontrar posição exata do "Output:" no texto
+            output_pos = txt.index("Output:")
+            # Incluir "Output: " (com espaço) no prefixo
+            prefix_text = txt[:output_pos + len("Output: ")]
+            
+            # CRÍTICO: Tokenizar o prefixo com as MESMAS configurações
+            prefix_enc = tokenizer(prefix_text, add_special_tokens=True)
+            prefix_ids = prefix_enc["input_ids"]
+            prefix_len = len(prefix_ids)
+            
+            # CORREÇÃO MELHORADA: Verificar alinhamento por busca direta
+            # Em vez de tentar decodificar, vamos procurar pela sequência "Output:" nos tokens
+            full_text_tokens = tokenizer.tokenize(txt)
+            output_token_found = False
+            
+            # Buscar token que contenha "Output" ou similar
+            for i, token in enumerate(full_text_tokens):
+                if "output" in token.lower() or "Output" in token:
+                    # Encontrou! Usar posição + 1 para incluir o espaço
+                    prefix_len = min(i + 2, len(ids) - 1)  # +2 para incluir token seguinte (espaço)
+                    output_token_found = True
+                    break
+            
+            if not output_token_found:
+                # Fallback: calcular baseado na proporção do texto
+                text_ratio = len(prefix_text) / max(1, len(txt))
+                prefix_len = int(text_ratio * len(ids))
+                prefix_len = max(1, min(prefix_len, len(ids) - 5))  # Deixar pelo menos 5 tokens para treinar
+                
+        except ValueError:
+            # Se não encontrar "Output:", tratar como caso especial
+            log(f"⚠️  'Output:' não encontrado no texto do exemplo {idx}, pulando máscara")
+            prefix_len = 0
+
+        # VALIDAÇÃO: Garantir que prefix_len não exceda o comprimento total
+        prefix_len = min(prefix_len, len(ids) - 1)  # Deixar pelo menos 1 token para treinar
+
+        # Criar labels mascarando o prefixo
+        labels = ids.copy()
+
+        # 1) Mascarar o prefixo "Input: ... Output: "
+        for i in range(prefix_len):
+            labels[i] = -100
+
+        # 2) Mascarar padding
+        for i in range(len(labels)):
+            if att[i] == 0:
+                labels[i] = -100
+
+        # DEBUG: Log detalhado do primeiro exemplo
+        if debug_first and idx == 0:
+            log("🔍 DEBUG - Primeiro exemplo de tokenização:")
+            log(f"  Texto original: '{txt}'")
+            log(f"  prefix_len calculado: {prefix_len}")
+            log(f"  Total tokens: {len(ids)}")
+            log(f"  Tokens não-masked (para treino): {sum(1 for x in labels if x != -100)}")
+            log(f"  Padding tokens: {sum(1 for x in att if x == 0)}")
+            
+            # Mostrar tokens reais em vez de decodificação problemática
+            try:
+                all_tokens = tokenizer.convert_ids_to_tokens(ids)
+                # Encontrar tokens não mascarados (para treino)
+                training_token_ids = [token_id for token_id, label in zip(ids, labels) if label != -100]
+                training_tokens = tokenizer.convert_ids_to_tokens(training_token_ids[:10])  # Primeiros 10
+                
+                log(f"  Primeiros tokens do texto: {all_tokens[:10]}")
+                log(f"  Tokens para treinamento: {training_tokens}")
+                
+                # Decodificar só a parte de treinamento
+                if training_token_ids:
+                    training_text = tokenizer.decode(training_token_ids, skip_special_tokens=True)
+                    log(f"  Texto de treinamento decodificado: '{training_text}'")
+                
+            except Exception as e:
+                log(f"  ⚠️  Erro no debug detalhado: {e}")
+            
+            debug_first = False
+
+        input_ids_list.append(ids)
+        attention_mask_list.append(att)
+        labels_list.append(labels)
+
+    return {"input_ids": input_ids_list, "attention_mask": attention_mask_list, "labels": labels_list}
+
+
+# =============================================================================
+# Constrained decoding
+# =============================================================================
+
+def build_prefix_allowed_fn(tokenizer, trie: Trie, prefix_ids: List[int]):
+    """
+    Retorna função `prefix_allowed_tokens_fn` para HF generate(), restringindo os
+    próximos tokens aos caminhos **válidos** do trie (labels TG-263).
+
+    Observações:
+    - Extraímos a **parte gerada** (após o prefixo) e navegamos no trie.
+    - Se o nó atual for terminal, permitimos `eos_token_id` (encerrar no rótulo).
+    """
+    eos_id = tokenizer.eos_token_id
+
+    def prefix_allowed_tokens_fn(batch_id, input_ids):
+        # input_ids pode vir como tensor 1D/2D ou lista
+        if isinstance(input_ids, torch.Tensor):
+            seq = input_ids[batch_id].tolist() if input_ids.dim() > 1 else input_ids.tolist()
+        else:
+            seq = input_ids[batch_id] if isinstance(input_ids, list) else input_ids
+            if not isinstance(seq, list):
+                seq = [seq]
+
+        # Caminho gerado APÓS o prefixo usado em generate()
+        gen_path = seq[len(prefix_ids):] if len(seq) > len(prefix_ids) else []
+
+        node = trie.root
+        for tid in gen_path:
+            if tid in node:
+                node = node[tid]
+            else:
+                # Qualquer token fora do trie encerra (permite eos somente)
+                return [eos_id]
+
+        allowed = [k for k in node.keys() if k != trie.end]
+        if trie.end in node:
+            allowed.append(eos_id)
+
+        return allowed if allowed else [eos_id]
+
+    return prefix_allowed_tokens_fn
+
+
+def translate_constrained(
+    model,
+    tokenizer,
+    trie: Trie,
+    text_in: str,
+    device,
+    max_new_tokens: int = 16,
+    reject_if_low_conf: bool = False,
+    min_avg_logprob: float = -2.5,
+) -> Tuple[Optional[str], Dict]:
+    """
+    Gera **um** rótulo TG-263 com decoding restrito ao trie e calcula a
+    log-prob média por token gerado. Se `reject_if_low_conf` e a confiança
+    for baixa, retorna (None, meta).
+
+    Retorna:
+      (pred_str | None, meta=dict(avg_logprob: float, ...))
+    """
+    # Normalização leve do input para reduzir ruído (sem remover acentos/números)
+    def _normalize_inp(s: str) -> str:
+        s = re.sub(r"\s+", " ", s.strip())
+        return s
+
+    prompt = f"Input: {_normalize_inp(text_in)}\nOutput: "
+
+    # Tokenização do prompt (importante para extrair prefix_ids compatíveis)
+    enc = tokenizer(prompt, return_tensors="pt")
+    enc = {k: v.to(device) for k, v in enc.items()}
+    prefix_ids = enc["input_ids"][0].tolist()
+
+    prefix_allowed_tokens_fn = build_prefix_allowed_fn(tokenizer, trie, prefix_ids)
+
+    with torch.no_grad():
+        out = model.generate(
+            **enc,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,                       # Greedy = determinístico
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
+            return_dict_in_generate=True,
+            output_scores=True,                    # necessário para log-probs
+        )
+
+    seq = out.sequences[0]
+
+    # ids realmente gerados (sem prefixo e sem EOS final, se houver)
+    gen_ids = seq.tolist()[len(prefix_ids):]
+    if gen_ids and gen_ids[-1] == tokenizer.eos_token_id:
+        gen_ids = gen_ids[:-1]
+
+    # Decodifica **apenas** a parte gerada
+    pred_str = tokenizer.decode(gen_ids, skip_special_tokens=True)
+    pred_str = pred_str.split("\n")[0].strip()  # mantém só a 1ª linha
+
+    # Confiança: log-prob média por token gerado
+    if len(gen_ids) == 0:
+        avg_logprob = float("-inf")
+    else:
+        step_scores = out.scores[:len(gen_ids)]
+        logprobs = []
+        for t, logits in enumerate(step_scores):
+            probs = torch.log_softmax(logits[0], dim=-1)
+            chosen_id = gen_ids[t]
+            logprobs.append(probs[chosen_id].item())
+        avg_logprob = sum(logprobs) / max(1, len(logprobs))
+
+    meta = {"avg_logprob": avg_logprob, "rejected": False}
+
+    if reject_if_low_conf and avg_logprob < min_avg_logprob:
+        meta["rejected"] = True
+        return None, meta
+
+    return pred_str, meta
+
+
+# =============================================================================
+# Avaliação e pós-processamento
+# =============================================================================
+
+def pick_primary_name(pred_str: str, tg_labels: List[str]) -> str:
+    """
+    Mapeia uma previsão arbitrária para o rótulo TG-263 **mais provável**:
+      1) Match exato → retorna
+      2) Contém algum label como substring (preferindo labels mais longos)
+      3) Fuzzy matching (WRatio)
+    """
+    s = pred_str or ""
+    if s in tg_labels:
+        return s
+    for lab in sorted(tg_labels, key=len, reverse=True):
+        if lab in s:
+            return lab
+    match = process.extractOne(s, tg_labels, scorer=fuzz.WRatio)
+    return match[0] if match else s
+
+
+def evaluate_on_set(
+    model,
+    tokenizer,
+    trie: Trie,
+    eval_pairs: List[Tuple[str, str]],
+    tg_labels: List[str],
+    device,
+    verbose: bool = False,
+    min_avg_logprob: float = -2.5,
+    max_new_tokens: int = 16,
+) -> Tuple[float, List[Tuple[str, str, str, Dict]]]:
+    """
+    Avalia acurácia **exata** (após normalização `pick_primary_name`) em `eval_pairs`.
+
+    Retorna:
+      accuracy, errors (lista de tuplas: input, y_true, y_pred_norm, meta)
+    """
+    total = len(eval_pairs)
+    correct = 0
+    errors = []
+
+    for x, y in eval_pairs:
+        pred, meta = translate_constrained(
+            model, tokenizer, trie, x, device,
+            reject_if_low_conf=False,
+            min_avg_logprob=min_avg_logprob,
+            max_new_tokens=max_new_tokens,
+        )
+        pred_norm = pick_primary_name((pred or "").strip(), tg_labels).strip()
+        y_norm = y.strip()
+
+        if pred_norm == y_norm:
+            correct += 1
+        else:
+            errors.append((x, y_norm, pred_norm, meta))
+
+        if verbose:
+            mark = "✓" if pred_norm == y_norm else "✗"
+            print(f"'{x}' -> {y_norm} | {pred_norm} {mark} [meta={meta}]")
+
+    accuracy = correct / max(1, total)
+    return accuracy, errors
+
+
+def translate_strict(
+    model,
+    tokenizer,
+    trie: Trie,
+    text_in: str,
+    device,
+    min_avg_logprob: float = -2.5,
+    max_new_tokens: int = 16,
+) -> Dict:
+    """
+    Inferência padronizada para produção:
+      - Gera com constrained decoding
+      - Aplica limiar de confiança (log-prob média)
+      - Retorna dicionário padronizado com `output` (TG label ou "NOT FOUND")
+    """
+    pred, meta = translate_constrained(
+        model, tokenizer, trie, text_in, device,
+        reject_if_low_conf=False,
+        min_avg_logprob=min_avg_logprob,
+        max_new_tokens=max_new_tokens
+    )
+    if pred is None or meta["avg_logprob"] < min_avg_logprob:
+        return {
+            "input": text_in,
+            "output": "NOT FOUND",
+            "status": "not_found",
+            "confidence": 0.0,
+            "meta": meta,
+        }
+    return {
+        "input": text_in,
+        "output": pred.strip(),
+        "status": "ok",
+        "confidence": None,  # opcional: pode-se calcular um score 0..1 à parte
+        "meta": meta,
+    }
+
+
+# =============================================================================
+# Treinamento / Salvamento
+# =============================================================================
+
+def ensure_pad_token(tokenizer, model):
+    """
+    Garante a existência de um `pad_token` distinto do `eos_token`.
+    Alguns modelos vêm sem pad definido; aqui adicionamos e ajustamos embeddings.
+    """
+    if tokenizer.pad_token is None or tokenizer.pad_token == tokenizer.eos_token:
+        tokenizer.add_special_tokens({"pad_token": "<|pad|>"})
+        try:
+            model.resize_token_embeddings(len(tokenizer))
+        except Exception:
+            pass
+    return tokenizer, model
+
+
+def attach_lora_for_training(model, target_modules: List[str], r=16, alpha=32, dropout=0.1):
+    """
+    Anexa adaptadores LoRA ao backbone para treinamento.
+    
+    CORREÇÕES IMPLEMENTADAS:
+    - Inclui MLPs (gate_proj, up_proj, down_proj) além de attention projections
+    - Validação de target_modules para o modelo específico
+    - Configuração otimizada para modelos 8B
+    - Checks de compatibilidade de dtype
+    """
+    
+    log(f"🔧 Configurando LoRA com r={r}, alpha={alpha}, dropout={dropout}")
+    log(f"🎯 Target modules solicitados: {target_modules}")
+    
+    # CORREÇÃO: Validar e expandir target_modules para modelos Llama/DeepSeek
+    available_modules = []
+    for name, module in model.named_modules():
+        if any(target in name for target in target_modules):
+            available_modules.append(name.split('.')[-1])
+    
+    # Remove duplicatas e ordena
+    available_modules = sorted(list(set(available_modules)))
+    log(f"📋 Módulos disponíveis encontrados: {available_modules}")
+    
+    # CORREÇÃO: Se poucos módulos foram encontrados, expandir automaticamente
+    if len(available_modules) < 4:
+        log("⚠️  Poucos target_modules encontrados, expandindo automaticamente...")
+        # Para modelos Llama-like, incluir os MLPs essenciais
+        expanded_modules = target_modules + ["gate_proj", "up_proj", "down_proj"]
+        expanded_modules = list(set(expanded_modules))  # Remove duplicatas
+        log(f"🔄 Target modules expandidos: {expanded_modules}")
+        target_modules = expanded_modules
+    
+    lora_cfg = LoraConfig(
+        r=r,
+        lora_alpha=alpha,
+        lora_dropout=dropout,
+        task_type="CAUSAL_LM",
+        target_modules=target_modules,
+        bias="none",                    # CORREÇÃO: Explicitamente não treinar bias
+        fan_in_fan_out=False,          # Para a maioria dos modelos modernos
+        inference_mode=False,          # Modo de treinamento
+    )
+    
+    log(f"✅ Configuração LoRA:")
+    log(f"  • Rank (r): {r}")
+    log(f"  • Alpha: {alpha} (scaling factor: {alpha/r})")
+    log(f"  • Dropout: {dropout}")
+    log(f"  • Target modules: {target_modules}")
+    
+    try:
+        model = get_peft_model(model, lora_cfg)
+        log("✅ Adaptadores LoRA aplicados com sucesso")
+    except Exception as e:
+        log(f"❌ Erro ao aplicar LoRA: {e}")
+        log("💡 Tentando com configuração mais conservadora...")
+        
+        # Fallback para configuração básica
+        lora_cfg_fallback = LoraConfig(
+            r=max(8, r//2),
+            lora_alpha=max(16, alpha//2),
+            lora_dropout=dropout,
+            task_type="CAUSAL_LM",
+            target_modules=["q_proj", "v_proj", "k_proj", "o_proj"],  # Mínimo
+        )
+        model = get_peft_model(model, lora_cfg_fallback)
+        log("✅ Adaptadores LoRA aplicados com configuração fallback")
+    
+    # CORREÇÃO: Garantir compatibilidade de dtype
+    base_dtype = next(model.base_model.parameters()).dtype
+    log(f"🔍 Dtype do modelo base: {base_dtype}")
+    
+    lora_params_fixed = 0
+    for name, param in model.named_parameters():
+        if param.requires_grad and param.dtype != base_dtype:
+            param.data = param.data.to(base_dtype)
+            lora_params_fixed += 1
+    
+    if lora_params_fixed > 0:
+        log(f"🔧 {lora_params_fixed} parâmetros LoRA ajustados para {base_dtype}")
+    
+    # DIAGNÓSTICO: Contar parâmetros treináveis
+    try:
+        model.print_trainable_parameters()
+    except Exception:
+        # Fallback manual
+        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        total = sum(p.numel() for p in model.parameters())
+        percentage = 100 * trainable / total
+        log(f"📊 Parâmetros treináveis: {trainable:,} / {total:,} ({percentage:.2f}%)")
+    
+    # VALIDAÇÃO CRÍTICA: Verificar se há parâmetros treináveis
+    trainable_count = sum(1 for p in model.parameters() if p.requires_grad)
+    if trainable_count == 0:
+        raise RuntimeError("❌ ERRO CRÍTICO: Nenhum parâmetro está configurado para treinamento!")
+    
+    log(f"✅ LoRA configurado com {trainable_count} grupos de parâmetros treináveis")
+    return model
+
+
+def save_model_variants(
+    model,
+    tokenizer,
+    out_dir: str,
+    save_mode: str = "adapters",
+) -> List[str]:
+    """
+    Salva o modelo nos formatos desejados:
+      - 'adapters': somente adapters LoRA (leve)
+      - 'merged'  : modelo completo com LoRA mesclado no backbone
+      - 'both'    : cria subpastas 'adapters/' e 'merged/' com ambos os formatos
+
+    Retorna lista de caminhos salvos (para upload opcional ao Hub).
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    saved_paths = []
+
+    # Sempre salve o tokenizer na raiz para referência
+    tokenizer.save_pretrained(out_dir)
+
+    if save_mode == "adapters":
+        peft_out = out_dir
+        model.save_pretrained(peft_out)  # salva adapters (adapter_model.safetensors etc.)
+        log(f"✓ Adapters LoRA salvos em: {peft_out}")
+        saved_paths.append(peft_out)
+
+    elif save_mode == "merged":
+        merged_out = out_dir
+        merged_model = None
+        try:
+            merged_model = model.merge_and_unload()
+        except Exception:
+            log("⚠️ Falha ao mesclar em GPU. Tentando em CPU...")
+            model = model.to("cpu")
+            merged_model = model.merge_and_unload()
+        if merged_model is not None:
+            merged_model.save_pretrained(merged_out, safe_serialization=True)
+            tokenizer.save_pretrained(merged_out)
+            log(f"✓ Modelo mesclado salvo em: {merged_out}")
+            saved_paths.append(merged_out)
+
+    else:  # both
+        peft_out = os.path.join(out_dir, "adapters")
+        merged_out = os.path.join(out_dir, "merged")
+        os.makedirs(peft_out, exist_ok=True)
+        os.makedirs(merged_out, exist_ok=True)
+
+        # 1) Adapters
+        model.save_pretrained(peft_out)
+        tokenizer.save_pretrained(peft_out)
+        log(f"✓ Adapters LoRA salvos em: {peft_out}")
+        saved_paths.append(peft_out)
+
+        # 2) Merged
+        merged_model = None
+        try:
+            # mescla no próprio objeto (cuidado com VRAM)
+            merged_model = model.merge_and_unload()
+        except Exception:
+            log("⚠️ Falha ao mesclar diretamente. Tentando transferir para CPU...")
+            try:
+                model_cpu = model.to("cpu")
+                merged_model = model_cpu.merge_and_unload()
+            except Exception:
+                log("❌ Falha ao mesclar o modelo. Pulei o save 'merged'.")
+
+        if merged_model is not None:
+            merged_model.save_pretrained(merged_out, safe_serialization=True)
+            tokenizer.save_pretrained(merged_out)
+            log(f"✓ Modelo mesclado salvo em: {merged_out}")
+            saved_paths.append(merged_out)
+
+    return saved_paths
+
+
+# =============================================================================
+# CLI / Main
+# =============================================================================
+
+def main():
+    parser = argparse.ArgumentParser(description="Fine-tuning TG-263 com LoRA, trie e NOT FOUND")
+    # Dados / referências
+    parser.add_argument("--data_json", required=True, help="JSON com exemplos {name_in, tg263_name}")
+    parser.add_argument("--tg_csv", required=True, help="CSV/XLSX com coluna 'TG263-Primary Name'")
+    # Modelo
+    parser.add_argument("--model_name", default="deepseek-ai/DeepSeek-R1-Distill-Llama-8B")
+    # Treino - CORREÇÕES: Parâmetros mais conservadores para estabilidade
+    parser.add_argument("--epochs", type=int, default=3, help="Épocas de treinamento (reduzido para estabilidade)")
+    parser.add_argument("--lr", type=float, default=1e-5, help="Learning rate (ultra-conservador para máxima estabilidade)")
+    parser.add_argument("--batch", type=int, default=4, help="Batch size (reduzido para Tesla P40)")
+    parser.add_argument("--grad_accum", type=int, default=4, help="Gradient accumulation (aumentado)")
+    parser.add_argument("--max_len", type=int, default=128)
+    parser.add_argument("--max_new_tokens", type=int, default=16, help="Tamanho máx. da saída de rótulo")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--min_avg_logprob", type=float, default=-2.5, help="Limiar de confiança para NOT FOUND")
+    parser.add_argument("--eval_verbose", action="store_true", default=False)
+    parser.add_argument("--tmp_dir", default="./tmp_tg263")
+    # LoRA - CORREÇÕES: Incluir MLPs por padrão
+    parser.add_argument("--lora_r", type=int, default=16)
+    parser.add_argument("--lora_alpha", type=int, default=32)
+    parser.add_argument("--lora_dropout", type=float, default=0.1)
+    parser.add_argument(
+        "--target_modules",
+        nargs="+",
+        default=["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        help="Módulos LoRA (incluindo MLPs para melhor qualidade)"
+    )
+    # Salvamento/Deploy
+    parser.add_argument("--out_dir", default="./modelo_tg263")
+    parser.add_argument("--save_mode", choices=["adapters", "merged", "both"], default="adapters")
+    parser.add_argument("--push_to_hub", action="store_true", default=False)
+    parser.add_argument("--hub_repo_id", type=str, default=None, help="ex.: 'seu-usuario/seu-modelo'")
+    # Modos
+    parser.add_argument("--eval_only", action="store_true", help="Pula o treinamento e executa apenas a avaliação")
+    parser.add_argument("--load_adapters", type=str, default=None, help="Caminho de adapters LoRA para carregar")
+
+    args = parser.parse_args()
+    set_seed(args.seed)
+
+    log("=" * 70)
+    log("FINE-TUNING TG-263 (LoRA + Constrained Decoding + NOT FOUND) - VERSÃO CORRIGIDA")
+    log("=" * 70)
+
+    # =========================================================================
+    # VALIDAÇÕES CRÍTICAS PRÉ-EXECUÇÃO
+    # =========================================================================
+    log("🔍 EXECUTANDO VALIDAÇÕES CRÍTICAS...")
+    
+    # Validar arquivos de entrada
+    if not os.path.exists(args.data_json):
+        raise FileNotFoundError(f"❌ Arquivo de dados não encontrado: {args.data_json}")
+    if not os.path.exists(args.tg_csv):
+        raise FileNotFoundError(f"❌ Arquivo TG-263 não encontrado: {args.tg_csv}")
+    
+    log(f"✅ Arquivos de entrada OK: {args.data_json}, {args.tg_csv}")
+
+    # -------------------------------------------------------------------------
+    # 1) Leitura de dados e labels COM VALIDAÇÃO RIGOROSA
+    # -------------------------------------------------------------------------
+    log("\n📋 CARREGANDO DADOS...")
+    dados = load_sanitized_json(args.data_json)
+    tg_labels = load_label_set(args.tg_csv, "TG263-Primary Name")
+    
+    # VALIDAÇÃO CRÍTICA: Verificar qualidade dos dados carregados
+    if len(dados) == 0:
+        raise ValueError("❌ Nenhum exemplo válido no arquivo JSON!")
+    if len(tg_labels) == 0:
+        raise ValueError("❌ Nenhuma label TG-263 válida no CSV!")
+    
+    log(f"✅ Exemplos carregados: {len(dados)} | Labels TG-263: {len(tg_labels)}")
+
+    # VALIDAÇÃO: Compatibilidade entre JSON e CSV
+    json_labels = set(str(d.get("tg263_name", "")).strip() for d in dados)
+    json_labels.discard("")  # Remove vazios
+    
+    # Calcular overlap entre labels do JSON e do CSV
+    overlap = json_labels.intersection(set(tg_labels))
+    missing = json_labels - set(tg_labels)
+    
+    overlap_percent = 100 * len(overlap) / max(1, len(json_labels))
+    log(f"📊 Compatibilidade JSON ↔ CSV: {len(overlap)}/{len(json_labels)} ({overlap_percent:.1f}%)")
+    
+    if overlap_percent < 50:
+        log(f"⚠️  AVISO: Baixa compatibilidade! Labels do JSON não presentes no CSV:")
+        for label in sorted(missing)[:10]:  # Mostrar até 10 exemplos
+            log(f"    • '{label}'")
+        log("💡 Isso pode indicar que o CSV está mal formatado ou colunas incorretas.")
+    else:
+        log(f"✅ Boa compatibilidade entre JSON e CSV!")
+
+    # Log de distribuição (pré-remapeamento)
+    dist_raw = Counter([str(d.get("tg263_name", "")).strip() for d in dados])
+    log("\n📈 Top 10 labels no dataset de treino:")
+    for name, cnt in dist_raw.most_common(10):
+        log(f"  • {name}: {cnt}")
+
+    # -------------------------------------------------------------------------
+    # 2) Construção dos datasets (com remapeamento para whitelist TG)
+    # -------------------------------------------------------------------------
+    log("\n🔨 CONSTRUINDO DATASETS...")
+    train_ds, val_ds = build_datasets(dados, split_ratio=0.85, seed=args.seed, label_whitelist=tg_labels)
+    
+    # VALIDAÇÃO CRÍTICA: Datasets não vazios
+    if len(train_ds) == 0:
+        raise ValueError("❌ Dataset de treino vazio após processamento!")
+    if len(val_ds) == 0:
+        log("⚠️  Dataset de validação vazio, usando parte do treino")
+        # Usar últimos 10% do treino para validação
+        split_point = int(0.9 * len(train_ds))
+        val_data = {"text": train_ds["text"][split_point:]}
+        train_data = {"text": train_ds["text"][:split_point]}
+        train_ds = Dataset.from_dict(train_data)
+        val_ds = Dataset.from_dict(val_data)
+    
+    log(f"✅ Datasets: Treino={len(train_ds)}, Validação={len(val_ds)}")
+    
+    # Mostrar exemplo formatado
+    if len(train_ds) > 0:
+        example_text = train_ds[0]["text"]
+        log(f"\n📋 Exemplo de treino formatado:")
+        # CORREÇÃO: evitar barra invertida em f-string
+        display_text = example_text.replace('\n', '\\n')
+        log(f"  {display_text}")
+
+    # -------------------------------------------------------------------------
+    # 3) Carregamento do modelo/tokenizer
+    # -------------------------------------------------------------------------
+    log("\n🤖 CARREGANDO MODELO E TOKENIZER...")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    log(f"🖥️  Device: {device}")
+    
+    if torch.cuda.is_available():
+        try:
+            gpu_name = torch.cuda.get_device_name()
+            mem = torch.cuda.get_device_properties(0).total_memory
+            log(f"🚀 GPU: {gpu_name}")
+            log(f"💾 Memória total: {human_bytes(mem)}")
+            
+            # Validação específica para Tesla P40
+            if "P40" in gpu_name or "Tesla" in gpu_name:
+                log("⚠️  GPU Tesla detectada - usando configurações otimizadas para FP16 nativo")
+                if args.batch > 4:
+                    log(f"⚠️  Batch size {args.batch} pode ser muito alto para P40, recomendado: ≤4")
+        except Exception:
+            log("⚠️  Não foi possível obter informações detalhadas da GPU")
+    else:
+        log("⚠️  Executando em CPU - treino será muito lento!")
+
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name, trust_remote_code=True)
+        log(f"✅ Tokenizer carregado: {args.model_name}")
+    except Exception as e:
+        raise RuntimeError(f"❌ Falha ao carregar tokenizer: {e}")
+
+    # CORREÇÃO DEFINITIVA: Forçar FP32 para resolver grad_norm=inf
+    try:
+        log(f"🔄 Carregando modelo: {args.model_name}...")
+        # FORÇAR FP32 para estabilidade numérica máxima
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model_name,
+            torch_dtype=torch.float32,  # OBRIGATÓRIO: FP32 para evitar overflow
+            trust_remote_code=True,
+            device_map=None,  # Carregamento manual para melhor controle
+        )
+        log(f"✅ Modelo carregado em {model.dtype} (FP32 forçado para estabilidade)")
+    except Exception as e:
+        raise RuntimeError(f"❌ Falha ao carregar modelo: {e}")
+
+    # Pad token (pode não existir em alguns modelos)
+    tokenizer, model = ensure_pad_token(tokenizer, model)
+
+    # Melhorias de treino/memória
+    model.config.use_cache = False                # evita warnings e reduz memória
+    if torch.cuda.is_available():
+        model = model.to(device)
+        log(f"✅ Modelo movido para {device}")
+
+    # -------------------------------------------------------------------------
+    # 4) LoRA: carregar adapters prontos ou preparar para treino
+    # -------------------------------------------------------------------------
+    log("\n🔧 CONFIGURANDO LoRA...")
+    if args.load_adapters:
+        # Carrega adapters existentes sobre o backbone
+        log(f"📂 Carregando adapters LoRA de: {args.load_adapters}")
+        try:
+            model = PeftModel.from_pretrained(model, args.load_adapters)
+            # Em alguns ambientes, é útil explicitar o adapter ativo:
+            try:
+                model.set_adapter(model.active_adapters)
+            except Exception:
+                pass
+            log("✅ Adapters LoRA carregados com sucesso")
+        except Exception as e:
+            raise RuntimeError(f"❌ Falha ao carregar adapters LoRA: {e}")
+    elif not args.eval_only:
+        # Preparar para treino adicionando cabeçalhos LoRA
+        log("🔨 Aplicando LoRA para treinamento...")
+        model = attach_lora_for_training(
+            model,
+            target_modules=args.target_modules,
+            r=args.lora_r,
+            alpha=args.lora_alpha,
+            dropout=args.lora_dropout,
+        )
+        
+        # VALIDAÇÃO CRÍTICA: Garantir que há parâmetros treináveis
+        trainable_params = sum(1 for p in model.parameters() if p.requires_grad)
+        if trainable_params == 0:
+            raise RuntimeError("❌ ERRO CRÍTICO: Nenhum parâmetro está marcado para treinamento!")
+        log(f"✅ {trainable_params} grupos de parâmetros configurados para treinamento")
+
+    # -------------------------------------------------------------------------
+    # 5) Tokenização + collator (máscara de loss só no 'Output:')
+    # -------------------------------------------------------------------------
+    log("\n🔤 TOKENIZANDO DATASETS...")
+    def map_fn(batch):
+        return tokenize_with_output_only_labels(batch, tokenizer, max_len=args.max_len)
+
+    tokenized_train = train_ds.map(map_fn, batched=True, remove_columns=["text"])
+    tokenized_val = val_ds.map(map_fn, batched=True, remove_columns=["text"])
+    
+    log(f"✅ Tokenização concluída: {len(tokenized_train)} treino, {len(tokenized_val)} validação")
+
+    # =========================================================================
+    # VALIDAÇÕES CRÍTICAS PÓS-TOKENIZAÇÃO
+    # =========================================================================
+    log("\n🔍 EXECUTANDO VALIDAÇÕES DE SANIDADE PÓS-TOKENIZAÇÃO...")
+    
+    if len(tokenized_train) > 0:
+        sample = tokenized_train[0]
+        input_ids = sample['input_ids']
+        labels = sample['labels']
+        attention_mask = sample['attention_mask']
+        
+        # Contadores básicos
+        total_tokens = len(input_ids)
+        masked_tokens = sum(1 for x in labels if x == -100)
+        training_tokens = total_tokens - masked_tokens
+        padding_tokens = sum(1 for x in attention_mask if x == 0)
+        
+        log(f"📊 ANÁLISE DO PRIMEIRO EXEMPLO TOKENIZADO:")
+        log(f"  • Total de tokens: {total_tokens}")
+        log(f"  • Tokens mascarados (-100): {masked_tokens}")
+        log(f"  • Tokens para treino: {training_tokens}")
+        log(f"  • Tokens de padding: {padding_tokens}")
+        log(f"  • Proporção treino/total: {100*training_tokens/max(1,total_tokens):.1f}%")
+        
+        # VALIDAÇÕES CRÍTICAS
+        if training_tokens == 0:
+            raise RuntimeError("❌ ERRO CRÍTICO: Nenhum token está configurado para treinamento! "
+                             "Problema na função de mascaramento.")
+        
+        if training_tokens > total_tokens * 0.8:
+            log(f"⚠️  AVISO: Muitos tokens para treino ({training_tokens}/{total_tokens}). "
+                 f"Pode indicar problema na detecção do prefixo 'Output:'")
+        
+        if training_tokens < 5:
+            log(f"⚠️  AVISO: Poucos tokens para treino ({training_tokens}). "
+                 f"Labels TG-263 podem estar muito curtas ou truncadas.")
+        
+        # Mostrar decodificação para verificação visual
+        try:
+            # Decodificar apenas partes relevantes para debug
+            prefix_tokens = [id for id, label in zip(input_ids, labels) if label == -100][:10]
+            training_tokens_sample = [id for id, label in zip(input_ids, labels) if label != -100][:10]
+            
+            prefix_text = tokenizer.decode(prefix_tokens, skip_special_tokens=True)
+            training_text = tokenizer.decode(training_tokens_sample, skip_special_tokens=True)
+            
+            log(f"📋 VERIFICAÇÃO VISUAL:")
+            log(f"  • Prefixo (mascarado): '{prefix_text}'")
+            log(f"  • Tokens de treino: '{training_text}'")
+            
+            # Verificar se "Output:" está no prefixo mascarado
+            if "Output" not in prefix_text and "Input" not in prefix_text:
+                log(f"⚠️  AVISO: Prefixo não parece conter 'Input:' ou 'Output:'. "
+                     f"Possível problema na detecção!")
+            else:
+                log(f"✅ Prefixo parece estar correto (contém Input/Output)")
+                
+        except Exception as e:
+            log(f"⚠️  Não foi possível decodificar para verificação visual: {e}")
+            
+        log(f"✅ Validações de sanidade aprovadas!")
+    
+    else:
+        raise RuntimeError("❌ Dataset tokenizado de treino está vazio!")
+
+    # Data collator personalizado que preserva gradientes
+    class CustomDataCollator:
+        def __init__(self, tokenizer):
+            self.tokenizer = tokenizer
+            
+        def __call__(self, features):
+            batch = {}
+            
+            # CORREÇÃO: Usar tensor adequadamente
+            batch["input_ids"] = torch.tensor([f["input_ids"] for f in features], dtype=torch.long)
+            batch["attention_mask"] = torch.tensor([f["attention_mask"] for f in features], dtype=torch.long) 
+            batch["labels"] = torch.tensor([f["labels"] for f in features], dtype=torch.long)
+            
+            return batch
+    
+    data_collator = CustomDataCollator(tokenizer)
+
+    # -------------------------------------------------------------------------
+    # 6) Treinamento (se não for somente avaliação)
+    # -------------------------------------------------------------------------
+    if not args.eval_only:
+        log("\n🚀 CONFIGURAÇÃO DE TREINAMENTO CORRIGIDA:")
+        
+        # CORREÇÃO CRÍTICA: LR ultra-conservador para evitar overflow
+        ultra_conservative_lr = min(args.lr, 1e-5)  # Máximo 1e-5 para estabilidade total
+        if ultra_conservative_lr != args.lr:
+            log(f"⚠️  Learning rate ajustado para estabilidade máxima: {args.lr} → {ultra_conservative_lr}")
+        
+        # CORREÇÃO: Configurações ultra-estáveis para resolver grad_norm=inf
+        args_train = TrainingArguments(
+            output_dir=args.tmp_dir,
+            per_device_train_batch_size=args.batch,
+            per_device_eval_batch_size=max(1, args.batch // 2),  # Eval batch menor
+            gradient_accumulation_steps=args.grad_accum,
+            num_train_epochs=args.epochs,
+            learning_rate=ultra_conservative_lr,  # CORREÇÃO: LR ultra-conservador
+            logging_steps=20,
+            save_steps=100,
+            eval_steps=100,
+            eval_strategy="steps",            # CORREÇÃO: usar eval_strategy (compatibilidade)
+            save_total_limit=2,
+            warmup_ratio=0.1,
+            fp16=False,                       # CORREÇÃO: modelo já em FP16, sem GradScaler
+            bf16=False,                       # Tesla P40 não suporta bf16
+            dataloader_drop_last=True,
+            remove_unused_columns=False,
+            load_best_model_at_end=True,
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
+            report_to=None,                   # Desabilitar wandb/tensorboard
+            weight_decay=0.01,
+            lr_scheduler_type="cosine",
+            logging_dir="./logs",
+            gradient_checkpointing=False,     # CORREÇÃO: pode causar problemas com LoRA
+            max_grad_norm=0.5,                # CORREÇÃO: Clipping mais agressivo para evitar inf
+            # ADICIONAL: Configurações de estabilidade
+            dataloader_num_workers=0,         # Evita problemas com multiprocessing
+            save_safetensors=True,            # Formato moderno
+            prediction_loss_only=True,       # Só calcular loss na eval
+            include_inputs_for_metrics=False,
+            # Configurações anti-OOM
+            max_steps=-1,
+            logging_first_step=True,
+            save_only_model=True,
+            # CRÍTICO para estabilidade numérica
+            ddp_find_unused_parameters=False,
+            dataloader_pin_memory=False,      # Pode causar OOM na P40
+        )
+        
+        log(f"✅ Configurações de treino otimizadas:")
+        log(f"  • Learning rate: {ultra_conservative_lr}")
+        log(f"  • Batch size treino/eval: {args.batch}/{max(1, args.batch // 2)}")
+        log(f"  • Gradient accumulation: {args.grad_accum}")
+        log(f"  • FP16: {args_train.fp16} (modelo já está em FP32)")
+        log(f"  • Max grad norm: {args_train.max_grad_norm}")
+
+        # CALLBACK PERSONALIZADO: Monitor de estabilidade numérica
+        from transformers import TrainerCallback
+        
+        class NaNMonitorCallback(TrainerCallback):
+            """Monitora NaN/Inf na loss e para o treinamento se detectado"""
+            
+            def __init__(self):
+                self.nan_count = 0
+                self.max_nan_tolerance = 3  # Máximo de NaN consecutivos
+                
+            def on_log(self, args, state, control, model=None, logs=None, **kwargs):
+                if logs is not None:
+                    # Verificar train_loss
+                    train_loss = logs.get("train_loss", None)
+                    eval_loss = logs.get("eval_loss", None)
+                    grad_norm = logs.get("grad_norm", None)
+                    
+                    # Detectar NaN/Inf
+                    has_nan = False
+                    if train_loss is not None and (not torch.isfinite(torch.tensor(train_loss))):
+                        log(f"⚠️  NaN/Inf detectado em train_loss: {train_loss}")
+                        has_nan = True
+                    if eval_loss is not None and (not torch.isfinite(torch.tensor(eval_loss))):
+                        log(f"⚠️  NaN/Inf detectado em eval_loss: {eval_loss}")
+                        has_nan = True  
+                    if grad_norm is not None and (not torch.isfinite(torch.tensor(grad_norm))):
+                        log(f"⚠️  NaN/Inf detectado em grad_norm: {grad_norm}")
+                        has_nan = True
+                    
+                    if has_nan:
+                        self.nan_count += 1
+                        log(f"💥 INSTABILIDADE NUMÉRICA DETECTADA! Ocorrência #{self.nan_count}")
+                        
+                        if self.nan_count >= self.max_nan_tolerance:
+                            log(f"❌ PARANDO TREINAMENTO: {self.nan_count} NaN/Inf consecutivos detectados!")
+                            log(f"💡 Possíveis soluções:")
+                            log(f"   • Reduzir learning rate (atual: {args.learning_rate})")
+                            log(f"   • Reduzir batch size (atual: {args.per_device_train_batch_size})")
+                            log(f"   • Usar FP32 em vez de FP16")
+                            log(f"   • Aumentar gradient clipping (atual: {args.max_grad_norm})")
+                            control.should_training_stop = True
+                    else:
+                        # Reset contador se não houver NaN
+                        self.nan_count = 0
+                        
+                    # Log normal de progresso
+                    if state.global_step % 20 == 0:  # A cada 20 steps
+                        progress = 100 * state.global_step / max(1, state.max_steps) if state.max_steps > 0 else 0
+                        train_loss_str = f"{train_loss:.4f}" if train_loss is not None else "N/A"
+                        grad_norm_str = f"{grad_norm:.4f}" if grad_norm is not None else "N/A"
+                        log(f"📊 Step {state.global_step}: loss={train_loss_str}, "
+                            f"grad_norm={grad_norm_str}, progresso={progress:.1f}%")
+
+        nan_monitor = NaNMonitorCallback()
+
+        trainer = Trainer(
+            model=model,
+            args=args_train,
+            train_dataset=tokenized_train,
+            eval_dataset=tokenized_val,
+            processing_class=tokenizer,       # CORREÇÃO: usar processing_class= (versão mais nova)
+            data_collator=data_collator,
+            callbacks=[
+                EarlyStoppingCallback(early_stopping_patience=3),
+                nan_monitor,  # NOVO: Monitor de estabilidade numérica
+            ],
+        )
+
+        log("\n" + "=" * 70)
+        log("INICIANDO TREINAMENTO")
+        log("=" * 70)
+        
+        # DIAGNÓSTICO: Verificar parâmetros treináveis antes do treinamento
+        trainable_params = []
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                trainable_params.append((name, param.dtype, param.requires_grad))
+        
+        log(f"Parâmetros treináveis encontrados: {len(trainable_params)}")
+        if len(trainable_params) == 0:
+            log("❌ ERRO: Nenhum parâmetro está configurado para treinar!")
+            return
+            
+        # Mostrar alguns exemplos
+        for name, dtype, req_grad in trainable_params[:5]:
+            log(f"  {name}: dtype={dtype}, requires_grad={req_grad}")
+        
+        trainer.train()
+        log("✓ Treinamento concluído!")
+
+        # ---------------------------------------------------------------------
+        # 6.1) Salvamento (adapters / merged / both)
+        # ---------------------------------------------------------------------
+        saved_paths = save_model_variants(model, tokenizer, args.out_dir, args.save_mode)
+
+        # ---------------------------------------------------------------------
+        # 6.2) (Opcional) Upload para o Hugging Face Hub
+        # ---------------------------------------------------------------------
+        if args.push_to_hub:
+            if not _HF_AVAILABLE:
+                log("❌ huggingface_hub não está instalado. Faça: pip install huggingface_hub")
+            elif not args.hub_repo_id:
+                log("❌ --push_to_hub requer --hub_repo_id (ex.: 'seu-usuario/seu-modelo').")
+            else:
+                try:
+                    for path in saved_paths:
+                        repo_id = args.hub_repo_id
+                        # Se 'both', crie sufixos diferentes automaticamente
+                        if len(saved_paths) > 1:
+                            suffix = os.path.basename(path.rstrip("/"))
+                            repo_id = f"{args.hub_repo_id}-{suffix}"
+                        log(f"🆙 Criando/atualizando repo: {repo_id}")
+                        create_repo(repo_id, exist_ok=True)
+                        upload_folder(repo_id=repo_id, folder_path=path, commit_message="Upload model")
+                        log(f"✓ Upload concluído em: {repo_id}")
+                except Exception as e:
+                    log(f"❌ Falha no upload para o Hub: {e}")
+
+    else:
+        log("\nModo de avaliação apenas — pulando treinamento/salvamento.")
+
+    # -------------------------------------------------------------------------
+    # 7) Avaliação com constrained decoding (greedy)
+    # -------------------------------------------------------------------------
+    log("\nConstruindo trie de labels TG-263 para avaliação...")
+    trie = build_label_trie(tokenizer, tg_labels)
+
+    # Reconstrói pares a partir do texto formatado (val_ds)
+    eval_pairs: List[Tuple[str, str]] = []
+    for t in val_ds["text"]:
+        try:
+            x = t.split("Input: ", 1)[1].split("\nOutput:", 1)[0].strip()
+            y = t.split("Output:", 1)[1].strip().split("\n")[0].strip()
+            eval_pairs.append((x, y))
+        except Exception:
+            continue
+
+    # Determina qual objeto de modelo usar para inferência:
+    # - Se salvamos 'merged' agora, o `model` pode ter virado merged internamente.
+    # - No geral, `model` está pronto para inferência.
+    inference_model = model
+
+    acc, errors = evaluate_on_set(
+        inference_model,
+        tokenizer,
+        trie,
+        eval_pairs,
+        tg_labels,
+        device,
+        verbose=args.eval_verbose,
+        min_avg_logprob=args.min_avg_logprob,
+        max_new_tokens=args.max_new_tokens,
+    )
+    log(f"Acurácia Top-1 (Val, após normalização): {acc:.2%}")
+
+    if errors[:10]:
+        log("Erros (amostra até 10):")
+        for e in errors[:10]:
+            x, y_true, y_pred, meta = e
+            log(f"  '{x}' → {y_true} | pred={y_pred}  meta={meta}")
+
+    log("\n" + "=" * 70)
+    log("FINE-TUNING TG-263 CONCLUÍDO")
+    log("=" * 70)
+    log(f"Labels TG263 usados: {len(tg_labels)} (coluna 'TG263-Primary Name')")
+    log("Para inferência em produção: use translate_strict(model, tokenizer, trie, 'texto', device).")
+
+
+if __name__ == "__main__":
+    main()

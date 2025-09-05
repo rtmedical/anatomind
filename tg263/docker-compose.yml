@@ -101,3 +101,36 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./model/Llama-8B:/workspace/model:ro
+      - ./labels:/workspace/labels:ro
+      - ./flask/src:/workspace
+    environment:
+      - MODEL_PATH=/workspace/model
+      - TG_CSV_PATH=/workspace/labels/TG263.csv
+      - MIN_CONFIDENCE=-2.5
+      - HOST=0.0.0.0
+      - PORT=5000
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,max_split_size_mb:512
+      - CUDA_LAUNCH_BLOCKING=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

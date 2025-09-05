@@ -2,7 +2,7 @@
 
 # Build do Rust
 tg263/target/
-
+tg263/model/Llama-8B
 tg263/tgi/model/
 # Backups
 *.backup
